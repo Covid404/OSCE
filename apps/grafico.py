@@ -103,9 +103,63 @@ layout = html.Div(
                     data=df.assign(
                         **df.select_dtypes(['datetime']).astype(str).to_dict('list')
                     ).to_dict('records'),
-                    style_table={'maxWidth': '1500px'},
-                    style_header={'textAlign': 'center'},
-                    style_data={'textAlign': 'left',}
+                    style_cell={'textAlign': 'center'},
+                    style_cell_conditional=[
+                        {
+                            'if': {'column_id': 'data'},
+                            'width': '102px',
+                            'minWidth': '102px',
+                            'maxWidth': '102px'
+                        },
+                        {
+                            'if': {'column_id': 'estado'},
+                            'width': '63px',
+                            'minWidth': '63px',
+                            'maxWidth': '63px'
+                        },
+                        {
+                            'if': {'column_id': 'nome'},
+                            'width': '400px',
+                            'minWidth': '400px',
+                            'maxWidth': '400px',
+                            'overflow': 'hidden',
+                            'textOverflow': 'ellipsis',
+                        },
+                        {
+                            'if': {'column_id': 'preco'},
+                            'width': '102px',
+                            'minWidth': '102px',
+                            'maxWidth': '102px'
+                        },
+                        {
+                            'if': {'column_id': 'quantidade'},
+                            'width': '102px',
+                            'minWidth': '102px',
+                            'maxWidth': '102px'
+                        },
+                        {
+                            'if': {'column_id': 'anomalo'},
+                            'width': '0px',
+                            'minWidth': '0px',
+                            'maxWidth': '0px'
+                        },
+                    ],
+                    style_data_conditional=[
+                        {
+                            'if':{'column_id': 'nome'},
+                            'textAlign': 'left',
+                        },
+                        {
+                            'if':{'filter_query': '{{anomalo}} = {}'.format(-1),},
+                            'backgroundColor': '#fff3cd',
+                        },
+                    ],
+                    tooltip_data=[
+                        {
+                            'nome': {'value': row['nome'], 'type': 'markdown'}
+                        } for row in df.to_dict('rows')
+                    ],
+                    tooltip_duration=None,
                 )
             ]
         )
@@ -137,7 +191,7 @@ def update_datatable(start_date, end_date, states, price_limit, amount_limit):
     ).to_dict("rows")
     return updated_df
 
-# Callback datepicker
+
 @app.callback(
     Output('table', 'data'),
     [
