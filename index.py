@@ -35,12 +35,13 @@ app.layout = html.Div([
         ]
     ),
     dcc.Location(id='url', refresh=False),
-    html.Div(id='page-content', className='container')
+    html.Div(id='parent-content', className='parent-container',
+    children=html.Div(id='page-content', className='container'))
 ])
 
 
 @app.callback(Output('page-content', 'children'),
-              [Input('url', 'pathname')])
+                [Input('url', 'pathname')])
 def display_page(pathname):
     if pathname == '/':
         return grafico.layout
