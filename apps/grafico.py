@@ -12,15 +12,15 @@ colors = {
     'text': 'black'
 }
 
-df = pd.read_csv('data/dados_pe.csv', infer_datetime_format=True)
+df = pd.read_csv('data/predictions.csv', infer_datetime_format=True)
 df['data'] = pd.to_datetime(df['data'])
 current_year = 2020
-columns = df.columns
 
 layout = html.Div(
     children=[
         html.H1(
-            children='Dados Pernambuco',
+            id='dados-estado',
+            children='Dados',
             style={'textAlign': 'center'}
         ),
         
@@ -30,11 +30,12 @@ layout = html.Div(
         ),
 
         html.Div(
-            className="row ",
-            style={'marginTop': 30, 'marginBottom': 15},
-            children = [
+            className="row",
+            style={'marginTop': 30, 'marginBottom': 0},
+            children=[
                 dcc.DatePickerRange(
-                    id='my-date-picker',
+                    id='date-picker',
+                    display_format='D/M/Y',
                     min_date_allowed=df['data'].min(),
                     max_date_allowed=df['data'].max(),
                     initial_visible_month=dt(current_year,df['data'].max().month, 1),
@@ -45,41 +46,122 @@ layout = html.Div(
         ),
 
         html.Div(
+            className="row",
+            style={'marginTop': 0, 'marginBottom': 0},
+            children=[
+                dcc.Dropdown(
+                    id='state-picker',
+                    options=[{'label':estado, 'value':estado} for estado in df['estado'].unique()],
+                    multi=True,
+                    placeholder='Selecione um Estado',
+                    style={'width': '286px', 'heigth':'48px'},
+                    value=[]
+                ),
+            ],
+        ),
+
+        html.Div(
+            style={'marginTop': 15},
+            children=[
+                html.Span(
+                    'Faixa de Preço: %sR$ - %sR$' % (df['preco'].min(), df['preco'].max()),
+                    id='display-price-slider'
+                ),
+                dcc.RangeSlider(
+                    id='price-slider',
+                    min=df['preco'].min(),
+                    max=df['preco'].max(),
+                    step=1,
+                    value=[df['preco'].min(), df['preco'].max()],
+                )
+            ]
+        ),
+
+        html.Div(
+            children=[
+                html.Span(
+                    'Quantidade: %s - %s' % (df['quantidade'].min(), df['quantidade'].max()),
+                    id='display-amount-slider'
+                ),
+                dcc.RangeSlider(
+                    id='amount-slider',
+                    min=df['quantidade'].min(),
+                    max=df['quantidade'].max(),
+                    step=1,
+                    value=[df['quantidade'].min(), df['quantidade'].max()],
+                )
+            ]
+        ),
+
+        html.Div(
             style={'textAlign': 'center'},
             children=[
                 dash_table.DataTable(
                     id='table',
                     columns=[{"name": i, "id": i} for i in df.columns],
+                    column_selectable='multi',
                     data=df.assign(
                         **df.select_dtypes(['datetime']).astype(str).to_dict('list')
                     ).to_dict('records'),
+                    style_table={'maxWidth': '1500px'},
                     style_header={'textAlign': 'center'},
-                    style_data={'textAlign': 'left'}
+                    style_data={'textAlign': 'left',}
                 )
             ]
         )
 ])
 
 
-def update_first_datatable(start_date, end_date):
+def update_datatable(start_date, end_date, states, price_limit, amount_limit):
     if start_date is not None:
         start_date = dt.strptime(start_date, '%Y-%m-%d')
-        start_date_string = start_date.strftime('%Y-%m-%d')
     if end_date is not None:
         end_date = dt.strptime(end_date, '%Y-%m-%d')
-        end_date_string = end_date.strftime('%Y-%m-%d')
+    updated_df = df[(df['data'] >= start_date) & (df['data'] <= end_date)]
 
-    days_selected = (end_date - start_date).days
+    if states != []:
+        updated_df = updated_df[updated_df['estado'].isin(states)]
 
-    df_by_date = df[(df['data'] >= start_date) & (df['data'] <= end_date)]
-    data_df = df_by_date.assign(
-        **df_by_date.select_dtypes(['datetime']).astype(str).to_dict('list')
+    updated_df = updated_df[
+        (updated_df['preco'] >= price_limit[0])
+        & (updated_df['preco'] <= price_limit[1])
+    ]
+
+    updated_df = updated_df[
+        (updated_df['quantidade'] >= amount_limit[0])
+        & (updated_df['quantidade'] <= amount_limit[1])
+    ]
+
+    updated_df = updated_df.assign(
+        **updated_df.select_dtypes(['datetime']).astype(str).to_dict('list')
     ).to_dict("rows")
-    return data_df
+    return updated_df
 
-@app.callback(Output('table', 'data'),
-	[Input('my-date-picker', 'start_date'),
-	 Input('my-date-picker', 'end_date')])
-def update_data(start_date, end_date):
-	data = update_first_datatable(start_date[:10], end_date[:10])
+# Callback datepicker
+@app.callback(
+    Output('table', 'data'),
+    [
+        Input('date-picker', 'start_date'),
+        Input('date-picker', 'end_date'),
+        Input('state-picker', 'value'),
+        Input('price-slider', 'value'),
+        Input('amount-slider', 'value')
+    ]
+)
+def update_data(start_date, end_date, states, price_limit, amount_limit):
+	data = update_datatable(start_date[:10], end_date[:10], states, price_limit, amount_limit)
 	return data
+
+@app.callback(
+    Output('display-price-slider', 'children'),
+    [Input('price-slider', 'value')]
+)
+def update_price_slider(limits):
+    return 'Faixa de Preço: %sR$ - %sR$' % (limits[0], limits[1])
+
+@app.callback(
+    Output('display-amount-slider', 'children'),
+    [Input('amount-slider', 'value')]
+)
+def update_price_slider(limits):
+    return 'Quantidade: %s - %s' % (limits[0], limits[1])
