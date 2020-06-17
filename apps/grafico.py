@@ -1,20 +1,36 @@
+import json
 import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
+import plotly.express as px
 import pandas as pd
 from datetime import datetime as dt
-from datetime import date, timedelta
+from datetime import date
 from app import app
 from dash.dependencies import Input, Output
+
+with open('data/geojson_uf.json') as response:
+    geojson_uf = json.load(response)
 
 colors = {
     'background': '#23272c',
     'text': 'black'
 }
 
-df = pd.read_csv('data/predictions.csv', infer_datetime_format=True)
+df = pd.read_csv('data/predictions.csv')
 df['data'] = pd.to_datetime(df['data'])
 current_year = 2020
+
+fig = px.choropleth(df,
+    geojson=geojson_uf,
+    locations='estado',
+    color='anomalo',
+    featureidkey='properties.UF_05',
+    scope='south america',
+)
+fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, clickmode='event+select')
+
+previous_click = None
 
 layout = html.Div(
     children=[
@@ -23,10 +39,20 @@ layout = html.Div(
             children='Dados',
             style={'textAlign': 'center'}
         ),
-        
+
         html.Div(
             'Compras de Respiradores',
             style={'textAlign': 'center'}
+        ),
+
+        html.Div(
+            id="map_geo_outer",
+            children=[
+                dcc.Graph(
+                    id="choropleth",
+                    figure=fig,
+                ),
+            ]
         ),
 
         html.Div(
@@ -41,21 +67,6 @@ layout = html.Div(
                     initial_visible_month=dt(current_year,df['data'].max().month, 1),
                     start_date=df['data'].min(),
                     end_date=df['data'].max(),
-                ),
-            ],
-        ),
-
-        html.Div(
-            className="row",
-            style={'marginTop': 0, 'marginBottom': 0},
-            children=[
-                dcc.Dropdown(
-                    id='state-picker',
-                    options=[{'label':estado, 'value':estado} for estado in df['estado'].unique()],
-                    multi=True,
-                    placeholder='Selecione um Estado',
-                    style={'width': '286px', 'heigth':'48px'},
-                    value=[]
                 ),
             ],
         ),
@@ -98,7 +109,13 @@ layout = html.Div(
             children=[
                 dash_table.DataTable(
                     id='table',
-                    columns=[{"name": i, "id": i} for i in df.columns],
+                    columns=[
+                        {'name':'Data', 'id':'data'},
+                        {'name':'Estado', 'id':'estado'},
+                        {'name':'Compra', 'id':'nome'},
+                        {'name':'Preço', 'id':'preco'},
+                        {'name':'Quantidade', 'id':'quantidade'},
+                    ],
                     column_selectable='multi',
                     data=df.assign(
                         **df.select_dtypes(['datetime']).astype(str).to_dict('list')
@@ -166,15 +183,21 @@ layout = html.Div(
 ])
 
 
-def update_datatable(start_date, end_date, states, price_limit, amount_limit):
-    if start_date is not None:
-        start_date = dt.strptime(start_date, '%Y-%m-%d')
-    if end_date is not None:
-        end_date = dt.strptime(end_date, '%Y-%m-%d')
-    updated_df = df[(df['data'] >= start_date) & (df['data'] <= end_date)]
+def update_datatable(start_date, end_date, price_limit, amount_limit, state_click):
 
-    if states != []:
-        updated_df = updated_df[updated_df['estado'].isin(states)]
+    if state_click is not None:
+        states = [point['location'] for point in state_click['points']]
+        updated_df = df[df['estado'].isin(states)]
+    else:
+        updated_df = df
+
+    start_date = dt.strptime(start_date, '%Y-%m-%d')
+    end_date = dt.strptime(end_date, '%Y-%m-%d')
+    updated_df = updated_df[
+        (updated_df['data'] >= start_date)
+        & (updated_df['data'] <= end_date)
+    ]
+
 
     updated_df = updated_df[
         (updated_df['preco'] >= price_limit[0])
@@ -191,20 +214,19 @@ def update_datatable(start_date, end_date, states, price_limit, amount_limit):
     ).to_dict("rows")
     return updated_df
 
-
 @app.callback(
     Output('table', 'data'),
     [
         Input('date-picker', 'start_date'),
         Input('date-picker', 'end_date'),
-        Input('state-picker', 'value'),
         Input('price-slider', 'value'),
-        Input('amount-slider', 'value')
-    ]
+        Input('amount-slider', 'value'),
+        Input('choropleth', 'selectedData')
+    ],
 )
-def update_data(start_date, end_date, states, price_limit, amount_limit):
-	data = update_datatable(start_date[:10], end_date[:10], states, price_limit, amount_limit)
-	return data
+def update_data(start_date, end_date, price_limit, amount_limit, state_click):
+    data = update_datatable(start_date[:10], end_date[:10], price_limit, amount_limit, state_click)
+    return data
 
 @app.callback(
     Output('display-price-slider', 'children'),
