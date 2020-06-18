@@ -34,7 +34,7 @@ fig = px.choropleth(map_df,
                     color_continuous_scale='ylorrd'
                     )
 fig.update_layout(margin={"r": 0, "t": 0, "l": 0,
-                        "b": 0}, clickmode='event+select')
+                          "b": 0}, clickmode='event+select')
 
 def update_dataframe(df, start_date, end_date, price_limit, amount_limit, states_clicked):
     if states_clicked is not None:
@@ -285,10 +285,18 @@ def update_datatable(start_date, end_date, price_limit, amount_limit, state_clic
 
     start_date = dt.strptime(start_date, '%Y-%m-%d')
     end_date = dt.strptime(end_date, '%Y-%m-%d')
-    updated_df = updated_df[
-        (updated_df['data'] >= start_date)
-        & (updated_df['data'] <= end_date)
-    ]
+    # updated_df = updated_df[
+    #     (updated_df['data'] >= start_date)
+    #     & (updated_df['data'] <= end_date)
+    # ]
+    if(start_date == updated_df['data'].min() and
+            end_date == updated_df['data'].max()):
+        updated_df['data'] = updated_df['data']
+    else:
+        updated_df = updated_df[
+            (updated_df['data'] >= start_date)
+            & (updated_df['data'] <= end_date)
+        ]
 
     updated_df = updated_df[
         (updated_df['preco'] >= price_limit[0])
@@ -349,5 +357,8 @@ def update_price_slider(limits):
     Output('display-amount-slider', 'children'),
     [Input('amount-slider', 'value')]
 )
-def update_price_slider(limits):
+def update_amount_slider(limits):
     return 'Quantidade: %s - %s' % (limits[0], limits[1])
+
+# for data in df['data']:
+#     print(pd.isnull(data))
