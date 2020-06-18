@@ -8,8 +8,8 @@ body {
 }
 
 .parent-container {
-    background: rgb(204,204,204);
-    background: linear-gradient(90deg, rgba(204,204,204,1) 0%, rgba(83,101,108,1) 50%, rgba(204,204,204,1) 100%);
+    background: rgb(201,201,201);
+    background: linear-gradient(90deg, rgba(201,201,201,1) 0%, rgba(226,226,226,1) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -24,6 +24,9 @@ body {
     margin-bottom: 2%;
     border-radius: 1%;
     padding: 1%;
+    padding-right: 2%;
+    padding-left: 2%;
+    box-shadow: 0 0 15px 1px #303030;
 }
 
 .price-slider-parent {
@@ -47,7 +50,4 @@ body {
 
 .price-span {
     margin-bottom: 500px;
-}
-
-.map-container {
 }
