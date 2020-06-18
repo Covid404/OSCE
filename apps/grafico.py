@@ -37,36 +37,89 @@ fig = px.choropleth(map_df,
 fig.update_layout(margin={"r": 0, "t": 0, "l": 0,
                         "b": 0}, clickmode='event+select')
 
+def update_dataframe(df, start_date, end_date, price_limit, amount_limit, states_clicked):
+    if states_clicked is not None:
+        states = [point['location'] for point in states_clicked['points']]
+        updated_df = df[df['estado'].isin(states)]
+    else:
+        updated_df = df
+
+    start_date = dt.strptime(start_date, '%Y-%m-%d')
+    end_date = dt.strptime(end_date, '%Y-%m-%d')
+    updated_df = updated_df[
+        (updated_df['data'] >= start_date)
+        & (updated_df['data'] <= end_date)
+    ]
+
+    updated_df = updated_df[
+        (updated_df['preco'] >= price_limit[0])
+        & (updated_df['preco'] <= price_limit[1])
+    ]
+
+    updated_df = updated_df[
+        (updated_df['quantidade'] >= amount_limit[0])
+        & (updated_df['quantidade'] <= amount_limit[1])
+    ]
+
+    updated_df = updated_df.rename(columns={
+        'data': 'Data',
+        'estado': 'UF',
+        'nome': 'Compra',
+        'preco': 'Preço/Unidade',
+        'quantidade': 'Unidades'
+    })
+
+    updated_df = updated_df.assign(
+        **updated_df.select_dtypes(['datetime']).astype(str).to_dict('list')
+    )
+    return updated_df
+
+def create_row(row):
+    if row['anomalo'] == -1:
+        return html.Tr(
+            [html.Td(value, style={'fontSize': 'small'}) for index, value in row.iteritems() if index != 'anomalo'],
+            className='suspeito'
+        )
+    return html.Tr(
+        [html.Td(value, style={'fontSize': 'small'}) for index, value in row.iteritems() if index != 'anomalo'],
+    )
+
+def update_table(df):
+    return html.Table(
+        className='table table-sm table-bordered table-hover',
+        style={'backgroundColor': 'white'},
+        children=[
+            html.Thead(
+                html.Tr(
+                    [
+                        html.Th(column, style={'fontSize': 'small'})
+                        for column in df.columns if column != 'anomalo'
+                    ]
+                )
+            ),
+            html.Tbody(
+                [create_row(row) for index, row in df.iterrows()]
+            ),
+        ]
+    )
+
 layout = html.Div(
     children=[
         html.H1(
             id='dados-estado',
-            children='Dados',
+            children='Dados de Compras de Respiradores',
             style={'textAlign': 'center',
                     'color': colors['text']}
         ),
 
-        html.Div(
-            'Compras de Respiradores',
-            style={'textAlign': 'center',
-                    'marginTop': '1%',
-                    'color': colors['text']}
-        ),
-
-        html.Div(
-            className='row',
-            children=[
-                html.Div(
-                    className='col',
-                    children=[
-                        dcc.Graph(
-                            id="choropleth",
-                            figure=fig,
-                        ),
-                    ]
-                )
-            ]
-        ),
+        # html.Div(
+        #     children=[
+        #         dcc.Graph(
+        #             id="choropleth",
+        #             figure=fig,
+        #         ),
+        #     ],
+        # ),
 
         html.Div(
             className='row row-cols-1 row-cols-md-3 mt-1',
@@ -128,70 +181,98 @@ layout = html.Div(
         ),
 
         html.Div(
-            style={'textAlign': 'center'},
-            className="table-parent",
+            className='row',
             children=[
-                dash_table.DataTable(
-                    id='table',
-                    columns=[
-                        {'name': 'Data', 'id': 'data'},
-                        {'name': 'UF', 'id': 'estado'},
-                        {'name': 'Compra', 'id': 'nome'},
-                        {'name': 'Preço', 'id': 'preco'},
-                        {'name': 'Quantidade', 'id': 'quantidade'},
-                    ],
-                    column_selectable='multi',
-                    data=df.assign(
-                        **df.select_dtypes(['datetime']).astype(str).to_dict('list')
-                    ).to_dict('records'),
-                    sort_action='native',
-                    style_header={
-                        'backgroundColor': colors['text'],
-                        'fontWeight': 'bold',
-                        'fontSize' : '18px',
-                    },
-                    style_cell={'textAlign': 'center'},
-                    style_cell_conditional=[
-                        {
-                            'if': {'column_id': 'nome'},
-                            'maxWidth': '400px',
-                            'overflow': 'hidden',
-                            'textOverflow': 'ellipsis',
-                        },
-                    ],
-                    style_data_conditional=[
-                        {
-                            'if': {'column_id': 'nome'},
-                            'textAlign': 'left',
-                        },
-                        {
-                            'if': {'row_index' : 'odd'},
-                            'backgroundColor' : 'rgb(248, 248, 248)'
-                        },
-                        {
-                            'if': {'row_index' : 'even'},
-                            'backgroundColor' : 'rgb(230, 230, 230)'
-                        },
-                        {
-                            'if': {'filter_query': '{{anomalo}} = {}'.format(-1),
-                                    'row_index' : 'odd'},
-                            'backgroundColor' : 'rgb(255, 205, 208)'
-                        },
-                        {
-                            'if': {'filter_query': '{{anomalo}} = {}'.format(-1),
-                                    'row_index' : 'even'},
-                            'backgroundColor' : 'rgb(255, 186, 191)'
-                        },
-                    ],
-                    tooltip_data=[
-                        {
-                            'nome': {'value': row['nome'], 'type': 'markdown'}
-                        } for row in df.to_dict('rows')
-                    ],
-                    tooltip_duration=None,
-                )
+                html.Div(
+                    className='col p-0',
+                    children=dcc.Graph(
+                        id="choropleth",
+                        figure=fig,
+                    ),
+                    style={'maxWidth': '30%'}
+                ),
+                html.Div(
+                    className='col p-0',
+                    children=html.Div(
+                        id='data-table',
+                        className='table-responsive',
+                    ),
+                    style={'maxWidth': '70%', 'maxHeight': '450px', 'overflow': 'auto'},
+                ),
             ]
-        )
+        ),
+
+        # html.Div(
+        #     id='data-table',
+        #     className='table-responsive',
+        #     style={'maxWidth': '400px'}
+        # ),
+
+        # html.Div(
+        #     style={'textAlign': 'center'},
+        #     className="table-parent",
+        #     children=[
+        #         dash_table.DataTable(
+        #             id='table',
+        #             columns=[
+        #                 {'name': 'Data', 'id': 'data'},
+        #                 {'name': 'UF', 'id': 'estado'},
+        #                 {'name': 'Compra', 'id': 'nome'},
+        #                 {'name': 'Preço', 'id': 'preco'},
+        #                 {'name': 'Quantidade', 'id': 'quantidade'},
+        #             ],
+        #             column_selectable='multi',
+        #             data=df.assign(
+        #                 **df.select_dtypes(['datetime']).astype(str).to_dict('list')
+        #             ).to_dict('records'),
+        #             sort_action='native',
+        #             style_header={
+        #                 'backgroundColor': colors['text'],
+        #                 'fontWeight': 'bold',
+        #                 'fontSize' : '18px',
+        #             },
+        #             style_cell={'textAlign': 'center'},
+        #             style_cell_conditional=[
+        #                 {
+        #                     'if': {'column_id': 'nome'},
+        #                     'maxWidth': '400px',
+        #                     'overflow': 'hidden',
+        #                     'textOverflow': 'ellipsis',
+        #                 },
+        #             ],
+        #             style_data_conditional=[
+        #                 {
+        #                     'if': {'column_id': 'nome'},
+        #                     'textAlign': 'left',
+        #                 },
+        #                 {
+        #                     'if': {'row_index' : 'odd'},
+        #                     'backgroundColor' : 'rgb(248, 248, 248)'
+        #                 },
+        #                 {
+        #                     'if': {'row_index' : 'even'},
+        #                     'backgroundColor' : 'rgb(230, 230, 230)'
+        #                 },
+        #                 {
+        #                     'if': {'filter_query': '{{anomalo}} = {}'.format(-1),
+        #                             'row_index' : 'odd'},
+        #                     'backgroundColor' : 'rgb(255, 205, 208)'
+        #                 },
+        #                 {
+        #                     'if': {'filter_query': '{{anomalo}} = {}'.format(-1),
+        #                             'row_index' : 'even'},
+        #                     'backgroundColor' : '#ffbabf'
+        #                 },
+        #             ],
+        #             tooltip_data=[
+        #                 {
+        #                     'nome': {'value': row['nome'], 'type': 'markdown'}
+        #                 } for row in df.to_dict('rows')
+        #             ],
+        #             tooltip_duration=None,
+        #         )
+        #     ]
+        # )
     ])
 
 
@@ -240,6 +321,21 @@ def update_data(start_date, end_date, price_limit, amount_limit, state_click):
     data = update_datatable(
         start_date[:10], end_date[:10], price_limit, amount_limit, state_click)
     return data
+
+
+@app.callback(
+    Output('data-table', 'children'),
+    [
+        Input('date-picker', 'start_date'),
+        Input('date-picker', 'end_date'),
+        Input('price-slider', 'value'),
+        Input('amount-slider', 'value'),
+        Input('choropleth', 'selectedData')
+    ],
+)
+def update_data(start_date, end_date, price_limit, amount_limit, state_clicked):
+    updated_df = update_dataframe(df, start_date[:10], end_date[:10], price_limit, amount_limit, state_clicked)
+    return update_table(updated_df)
 
 
 @app.callback(

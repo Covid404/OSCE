@@ -6,7 +6,6 @@ body {
     padding: 0;
 }
 
-
 .container {
     background-color: #343a40;
     margin-top: 1%;
@@ -16,6 +15,14 @@ body {
     padding-right: 2%;
     padding-left: 2%;
     box-shadow: 0 0 15px 1px #303030;
+}
+
+.suspeito{
+    background-color: #ffbabf;
+}
+
+.suspeito:hover{
+    background-color: darksalmon !important;
 }
 
 .price-slider-parent {
