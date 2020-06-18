@@ -1,25 +1,13 @@
 body {
     font-family: "Open Sans", sans-serif;
     font-weight: 300;
-    /* color: #a3a7b0;
-    background-color: #23272c; */
+    background: linear-gradient(90deg, rgba(201,201,201,1) 0%, rgba(226,226,226,1) 100%);
     margin: 0;
     padding: 0;
 }
 
-.parent-container {
-    background: rgb(201,201,201);
-    background: linear-gradient(90deg, rgba(201,201,201,1) 0%, rgba(226,226,226,1) 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 100vh;
-    min-height: 100vh;
-}
-
 .container {
     background-color: #343a40;
-    min-width: 75%;
     margin-top: 1%;
     margin-bottom: 2%;
     border-radius: 1%;
@@ -27,6 +15,14 @@ body {
     padding-right: 2%;
     padding-left: 2%;
     box-shadow: 0 0 15px 1px #303030;
+}
+
+.suspeito{
+    background-color: #ffbabf;
+}
+
+.suspeito:hover{
+    background-color: darksalmon !important;
 }
 
 .price-slider-parent {
@@ -44,10 +40,18 @@ body {
     align-items: center;
     justify-content: space-between;
     margin-bottom: 1%;
-    color: rgba(255, 255, 255, 0.9);
+    color: white;
     margin-top: 2%;
 }
 
 .price-span {
     margin-bottom: 500px;
+}
+
+.DateRangePickerInput,
+.DateInput_input.DateInput_input_1,
+.DateRangePickerInput_arrow_svg.DateRangePickerInput_arrow_svg_1{
+    background-color: #343a40;
+    color: white;
+    fill: white;
 }

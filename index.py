@@ -21,12 +21,12 @@ app.layout = html.Div([
                             html.A(
                                 'Home',
                                 className='nav-item nav-link',
-                                href='/'
+                                href='/',
                             ),
                             html.A(
                                 'Quem somos',
                                 className='nav-item nav-link',
-                                href='/quem_somos'
+                                href='/quem_somos',
                             ),
                         ]
                     )
@@ -35,8 +35,7 @@ app.layout = html.Div([
         ]
     ),
     dcc.Location(id='url', refresh=False),
-    html.Div(id='parent-content', className='parent-container',
-    children=html.Div(id='page-content', className='container'))
+    html.Div(id='page-content', className='container')
 ])
 
 

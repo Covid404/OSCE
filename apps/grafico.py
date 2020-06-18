@@ -13,58 +13,118 @@ with open('data/geojson_uf.json') as response:
     geojson_uf = json.load(response)
 
 colors = {
-    'background': '#23272c',
-    'text': 'black'
+    'background': '#343a40',
+    'text': 'white'
 }
 
 df = pd.read_csv('data/predictions.csv')
 df['data'] = pd.to_datetime(df['data'])
 current_year = 2020
 
-fig = px.choropleth(df,
+map_df = pd.read_csv('data/predictions.csv')
+map_df = map_df[map_df['anomalo'] != 1]
+map_df = map_df[['estado', 'anomalo']].groupby('estado', as_index=False).count()
+
+fig = px.choropleth(map_df,
                     geojson=geojson_uf,
                     locations='estado',
                     color='anomalo',
                     featureidkey='properties.UF_05',
-                    scope='south america'
+                    scope='south america',
+                    color_continuous_scale='ylorrd'
                     )
 fig.update_layout(margin={"r": 0, "t": 0, "l": 0,
                         "b": 0}, clickmode='event+select')
 
-previous_click = None
+def update_dataframe(df, start_date, end_date, price_limit, amount_limit, states_clicked):
+    if states_clicked is not None:
+        states = [point['location'] for point in states_clicked['points']]
+        updated_df = df[df['estado'].isin(states)]
+    else:
+        updated_df = df
+
+    start_date = dt.strptime(start_date, '%Y-%m-%d')
+    end_date = dt.strptime(end_date, '%Y-%m-%d')
+    updated_df = updated_df[
+        (updated_df['data'] >= start_date)
+        & (updated_df['data'] <= end_date)
+    ]
+
+    updated_df = updated_df[
+        (updated_df['preco'] >= price_limit[0])
+        & (updated_df['preco'] <= price_limit[1])
+    ]
+
+    updated_df = updated_df[
+        (updated_df['quantidade'] >= amount_limit[0])
+        & (updated_df['quantidade'] <= amount_limit[1])
+    ]
+
+    updated_df = updated_df.rename(columns={
+        'data': 'Data',
+        'estado': 'UF',
+        'nome': 'Compra',
+        'preco': 'Preço/Unidade',
+        'quantidade': 'Unidades'
+    })
+
+    updated_df = updated_df.assign(
+        **updated_df.select_dtypes(['datetime']).astype(str).to_dict('list')
+    )
+    return updated_df
+
+def create_row(row):
+    if row['anomalo'] == -1:
+        return html.Tr(
+            [html.Td(value, style={'fontSize': 'small'}) for index, value in row.iteritems() if index != 'anomalo'],
+            className='suspeito'
+        )
+    return html.Tr(
+        [html.Td(value, style={'fontSize': 'small'}) for index, value in row.iteritems() if index != 'anomalo'],
+    )
+
+def update_table(df):
+    return html.Table(
+        className='table table-sm table-bordered table-hover',
+        style={'backgroundColor': 'white'},
+        children=[
+            html.Thead(
+                html.Tr(
+                    [
+                        html.Th(column, style={'fontSize': 'small'})
+                        for column in df.columns if column != 'anomalo'
+                    ]
+                )
+            ),
+            html.Tbody(
+                [create_row(row) for index, row in df.iterrows()]
+            ),
+        ]
+    )
 
 layout = html.Div(
     children=[
         html.H1(
             id='dados-estado',
-            children='Dados',
+            children='Dados de Compras de Respiradores',
             style={'textAlign': 'center',
-                    'color': 'rgba(255,255,255,0.90)'}
+                    'color': colors['text']}
         ),
 
-        html.Div(
-            'Compras de Respiradores',
-            style={'textAlign': 'center',
-                    'marginTop': '1%',
-                    'color': 'rgba(255,255,255,0.90)'}
-        ),
+        # html.Div(
+        #     children=[
+        #         dcc.Graph(
+        #             id="choropleth",
+        #             figure=fig,
+        #         ),
+        #     ],
+        # ),
 
         html.Div(
-            id="map_geo_outer",
-            className="map-container",
-            children=[
-                dcc.Graph(
-                    id="choropleth",
-                    figure=fig,
-                ),
-            ]
-        ),
-
-        html.Div(
-            className='selectors-parent',
+            className='row row-cols-1 row-cols-md-3 mt-1',
             children=[
                 html.Div(
-                    className="date-selector",
+                    className='col text-center',
                     children=[
                         dcc.DatePickerRange(
                             id='date-picker',
@@ -75,18 +135,18 @@ layout = html.Div(
                                 current_year, df['data'].max().month, 1),
                             start_date=df['data'].min(),
                             end_date=df['data'].max(),
-                            style={'color' : 'white'}
                         ),
                     ],
                 ),
                 html.Div(
-                    className='price-slider-parent',
+                    className='col text-center',
                     children=[
                         html.Span(
                             'Faixa de Preço: R$ %s - R$ %s' % (
                                 df['preco'].min(), df['preco'].max()),
                             id='display-price-slider',
                             className="price-span",
+                            style={'color' : colors['text']}
                         ),
                         dcc.RangeSlider(
                             id='price-slider',
@@ -97,14 +157,14 @@ layout = html.Div(
                         )
                     ]
                 ),
-
                 html.Div(
-                    className='amount-slider-parent',
+                    className='col text-center',
                     children=[
                         html.Span(
                             'Quantidade: %s - %s' % (df['quantidade'].min(),
                                                     df['quantidade'].max()),
-                            id='display-amount-slider'
+                            id='display-amount-slider',
+                            style={'color' : colors['text']}
                         ),
                         dcc.RangeSlider(
                             id='amount-slider',
@@ -119,105 +179,99 @@ layout = html.Div(
             ]
         ),
 
-
-
         html.Div(
-            style={'textAlign': 'center'},
-            className="table-parent",
+            className='row',
             children=[
-                dash_table.DataTable(
-                    id='table',
-                    columns=[
-                        {'name': 'Data', 'id': 'data'},
-                        {'name': 'Estado', 'id': 'estado'},
-                        {'name': 'Compra', 'id': 'nome'},
-                        {'name': 'Preço', 'id': 'preco'},
-                        {'name': 'Quantidade', 'id': 'quantidade'},
-                    ],
-                    column_selectable='multi',
-                    data=df.assign(
-                        **df.select_dtypes(['datetime']).astype(str).to_dict('list')
-                    ).to_dict('records'),
-                    style_header={
-                        'backgroundColor': 'white',
-                        'fontWeight': 'bold',
-                        'fontSize' : '18px',
-                    },
-                    style_cell={'textAlign': 'center'},
-                    style_cell_conditional=[
-                        {
-                            'if': {'column_id': 'data'},
-                            'width': '102px',
-                            'minWidth': '102px',
-                            'maxWidth': '102px'
-                        },
-                        {
-                            'if': {'column_id': 'estado'},
-                            'width': '63px',
-                            'minWidth': '63px',
-                            'maxWidth': '63px'
-                        },
-                        {
-                            'if': {'column_id': 'nome'},
-                            'width': '400px',
-                            'minWidth': '400px',
-                            'maxWidth': '400px',
-                            'overflow': 'hidden',
-                            'textOverflow': 'ellipsis',
-                        },
-                        {
-                            'if': {'column_id': 'preco'},
-                            'width': '75px',
-                            'minWidth': '75px',
-                            'maxWidth': '75px'
-                        },
-                        {
-                            'if': {'column_id': 'quantidade'},
-                            'width': '63px',
-                            'minWidth': '63px',
-                            'maxWidth': '63px'
-                        },
-                        {
-                            'if': {'column_id': 'anomalo'},
-                            'width': '0px',
-                            'minWidth': '0px',
-                            'maxWidth': '0px'
-                        },
-                    ],
-                    style_data_conditional=[
-                        {
-                            'if': {'column_id': 'nome'},
-                            'textAlign': 'left',
-                        },
-                        {
-                            'if': {'row_index' : 'odd'},
-                            'backgroundColor' : 'rgb(248, 248, 248)'
-                        },
-                        {
-                            'if': {'row_index' : 'even'},
-                            'backgroundColor' : 'rgb(230, 230, 230)'
-                        },
-                        {
-                            'if': {'filter_query': '{{anomalo}} = {}'.format(-1),
-                                    'row_index' : 'odd'},
-                            'backgroundColor' : 'rgb(255, 205, 208)'
-                        },
-                        {
-                            'if': {'filter_query': '{{anomalo}} = {}'.format(-1),
-                                    'row_index' : 'even'},
-                            'backgroundColor' : 'rgb(255, 186, 191)'
-                        },
-                    ],
-                    tooltip_data=[
-                        {
-                            'nome': {'value': row['nome'], 'type': 'markdown'}
-                        } for row in df.to_dict('rows')
-                    ],
-                    tooltip_duration=None,
-                    style_as_list_view=True,
-                )
+                html.Div(
+                    className='col p-0',
+                    children=dcc.Graph(
+                        id="choropleth",
+                        figure=fig,
+                    ),
+                    style={'maxWidth': '30%'}
+                ),
+                html.Div(
+                    className='col p-0',
+                    children=html.Div(
+                        id='data-table',
+                        className='table-responsive',
+                    ),
+                    style={'maxWidth': '70%', 'maxHeight': '450px', 'overflow': 'auto'},
+                ),
             ]
-        )
+        ),
+
+        # html.Div(
+        #     id='data-table',
+        #     className='table-responsive',
+        #     style={'maxWidth': '400px'}
+        # ),
+
+        # html.Div(
+        #     style={'textAlign': 'center'},
+        #     className="table-parent",
+        #     children=[
+        #         dash_table.DataTable(
+        #             id='table',
+        #             columns=[
+        #                 {'name': 'Data', 'id': 'data'},
+        #                 {'name': 'UF', 'id': 'estado'},
+        #                 {'name': 'Compra', 'id': 'nome'},
+        #                 {'name': 'Preço', 'id': 'preco'},
+        #                 {'name': 'Quantidade', 'id': 'quantidade'},
+        #             ],
+        #             column_selectable='multi',
+        #             data=df.assign(
+        #                 **df.select_dtypes(['datetime']).astype(str).to_dict('list')
+        #             ).to_dict('records'),
+        #             sort_action='native',
+        #             style_header={
+        #                 'backgroundColor': colors['text'],
+        #                 'fontWeight': 'bold',
+        #                 'fontSize' : '18px',
+        #             },
+        #             style_cell={'textAlign': 'center'},
+        #             style_cell_conditional=[
+        #                 {
+        #                     'if': {'column_id': 'nome'},
+        #                     'maxWidth': '400px',
+        #                     'overflow': 'hidden',
+        #                     'textOverflow': 'ellipsis',
+        #                 },
+        #             ],
+        #             style_data_conditional=[
+        #                 {
+        #                     'if': {'column_id': 'nome'},
+        #                     'textAlign': 'left',
+        #                 },
+        #                 {
+        #                     'if': {'row_index' : 'odd'},
+        #                     'backgroundColor' : 'rgb(248, 248, 248)'
+        #                 },
+        #                 {
+        #                     'if': {'row_index' : 'even'},
+        #                     'backgroundColor' : 'rgb(230, 230, 230)'
+        #                 },
+        #                 {
+        #                     'if': {'filter_query': '{{anomalo}} = {}'.format(-1),
+        #                             'row_index' : 'odd'},
+        #                     'backgroundColor' : 'rgb(255, 205, 208)'
+        #                 },
+        #                 {
+        #                     'if': {'filter_query': '{{anomalo}} = {}'.format(-1),
+        #                             'row_index' : 'even'},
+        #                     'backgroundColor' : '#ffbabf'
+        #                 },
+        #             ],
+        #             tooltip_data=[
+        #                 {
+        #                     'nome': {'value': row['nome'], 'type': 'markdown'}
+        #                 } for row in df.to_dict('rows')
+        #             ],
+        #             tooltip_duration=None,
+        #         )
+        #     ]
+        # )
     ])
 
 
@@ -269,11 +323,26 @@ def update_data(start_date, end_date, price_limit, amount_limit, state_click):
 
 
 @app.callback(
+    Output('data-table', 'children'),
+    [
+        Input('date-picker', 'start_date'),
+        Input('date-picker', 'end_date'),
+        Input('price-slider', 'value'),
+        Input('amount-slider', 'value'),
+        Input('choropleth', 'selectedData')
+    ],
+)
+def update_data(start_date, end_date, price_limit, amount_limit, state_clicked):
+    updated_df = update_dataframe(df, start_date[:10], end_date[:10], price_limit, amount_limit, state_clicked)
+    return update_table(updated_df)
+
+
+@app.callback(
     Output('display-price-slider', 'children'),
     [Input('price-slider', 'value')]
 )
 def update_price_slider(limits):
-    return 'Faixa de Preço: %sR$ - %sR$' % (limits[0], limits[1])
+    return 'Faixa de Preço: R$%s - R$%s' % (limits[0], limits[1])
 
 
 @app.callback(
