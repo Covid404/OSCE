@@ -11,7 +11,6 @@ body {
     background: rgb(201,201,201);
     background: linear-gradient(90deg, rgba(201,201,201,1) 0%, rgba(226,226,226,1) 100%);
     display: flex;
-    align-items: center;
     justify-content: center;
     min-width: 100vh;
     min-height: 100vh;
@@ -44,10 +43,18 @@ body {
     align-items: center;
     justify-content: space-between;
     margin-bottom: 1%;
-    color: rgba(255, 255, 255, 0.9);
+    color: white;
     margin-top: 2%;
 }
 
 .price-span {
     margin-bottom: 500px;
+}
+
+.DateRangePickerInput,
+.DateInput_input.DateInput_input_1,
+.DateRangePickerInput_arrow_svg.DateRangePickerInput_arrow_svg_1{
+    background-color: #343a40;
+    color: white;
+    fill: white;
 }

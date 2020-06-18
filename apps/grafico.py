@@ -14,20 +14,25 @@ with open('data/geojson_uf.json') as response:
     geojson_uf = json.load(response)
 
 colors = {
-    'background': '#23272c',
-    'text': 'black'
+    'background': '#343a40',
+    'text': 'white'
 }
 
 df = pd.read_csv('data/predictions.csv')
 df['data'] = pd.to_datetime(df['data'])
 current_year = 2020
 
-fig = px.choropleth(df,
+map_df = pd.read_csv('data/predictions.csv')
+map_df = map_df[map_df['anomalo'] != 1]
+map_df = map_df[['estado', 'anomalo']].groupby('estado', as_index=False).count()
+
+fig = px.choropleth(map_df,
                     geojson=geojson_uf,
                     locations='estado',
                     color='anomalo',
                     featureidkey='properties.UF_05',
-                    scope='south america'
+                    scope='south america',
+                    color_continuous_scale='ylorrd'
                     )
 fig.update_layout(margin={"r": 0, "t": 0, "l": 0,
                         "b": 0}, clickmode='event+select')
@@ -76,7 +81,7 @@ layout = html.Div(
                                 current_year, df['data'].max().month, 1),
                             start_date=df['data'].min(),
                             end_date=df['data'].max(),
-                            style={'color' : 'white'}
+                            style={'color' : colors['text']}
                         ),
                     ],
                 ),
@@ -130,7 +135,7 @@ layout = html.Div(
                     id='table',
                     columns=[
                         {'name': 'Data', 'id': 'data'},
-                        {'name': 'Estado', 'id': 'estado'},
+                        {'name': 'UF', 'id': 'estado'},
                         {'name': 'Compra', 'id': 'nome'},
                         {'name': 'Preço', 'id': 'preco'},
                         {'name': 'Quantidade', 'id': 'quantidade'},
@@ -139,50 +144,19 @@ layout = html.Div(
                     data=df.assign(
                         **df.select_dtypes(['datetime']).astype(str).to_dict('list')
                     ).to_dict('records'),
+                    sort_action='native',
                     style_header={
-                        'backgroundColor': 'white',
+                        'backgroundColor': colors['text'],
                         'fontWeight': 'bold',
                         'fontSize' : '18px',
                     },
                     style_cell={'textAlign': 'center'},
                     style_cell_conditional=[
                         {
-                            'if': {'column_id': 'data'},
-                            'width': '102px',
-                            'minWidth': '102px',
-                            'maxWidth': '102px'
-                        },
-                        {
-                            'if': {'column_id': 'estado'},
-                            'width': '63px',
-                            'minWidth': '63px',
-                            'maxWidth': '63px'
-                        },
-                        {
                             'if': {'column_id': 'nome'},
-                            'width': '400px',
-                            'minWidth': '400px',
                             'maxWidth': '400px',
                             'overflow': 'hidden',
                             'textOverflow': 'ellipsis',
-                        },
-                        {
-                            'if': {'column_id': 'preco'},
-                            'width': '75px',
-                            'minWidth': '75px',
-                            'maxWidth': '75px'
-                        },
-                        {
-                            'if': {'column_id': 'quantidade'},
-                            'width': '63px',
-                            'minWidth': '63px',
-                            'maxWidth': '63px'
-                        },
-                        {
-                            'if': {'column_id': 'anomalo'},
-                            'width': '0px',
-                            'minWidth': '0px',
-                            'maxWidth': '0px'
                         },
                     ],
                     style_data_conditional=[
@@ -215,7 +189,6 @@ layout = html.Div(
                         } for row in df.to_dict('rows')
                     ],
                     tooltip_duration=None,
-                    style_as_list_view=True,
                 )
             ]
         )
