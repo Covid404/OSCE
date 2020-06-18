@@ -37,8 +37,7 @@ app.layout = html.Div([
         ]
     ),
     dcc.Location(id='url', refresh=False),
-    html.Div(id='parent-content', className='parent-container',
-    children=html.Div(id='page-content', className='container'))
+    html.Div(id='page-content', className='container')
 ])
 
 

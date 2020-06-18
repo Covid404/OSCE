@@ -37,40 +37,42 @@ fig = px.choropleth(map_df,
 fig.update_layout(margin={"r": 0, "t": 0, "l": 0,
                         "b": 0}, clickmode='event+select')
 
-previous_click = None
-
 layout = html.Div(
     children=[
         html.H1(
             id='dados-estado',
             children='Dados',
             style={'textAlign': 'center',
-                    'color': 'rgba(255,255,255,0.90)'}
+                    'color': colors['text']}
         ),
 
         html.Div(
             'Compras de Respiradores',
             style={'textAlign': 'center',
                     'marginTop': '1%',
-                    'color': 'rgba(255,255,255,0.90)'}
+                    'color': colors['text']}
         ),
 
         html.Div(
-            id="map_geo_outer",
-            className="map-container",
+            className='row',
             children=[
-                dcc.Graph(
-                    id="choropleth",
-                    figure=fig,
-                ),
+                html.Div(
+                    className='col',
+                    children=[
+                        dcc.Graph(
+                            id="choropleth",
+                            figure=fig,
+                        ),
+                    ]
+                )
             ]
         ),
 
         html.Div(
-            className='selectors-parent',
+            className='row row-cols-1 row-cols-md-3 mt-1',
             children=[
                 html.Div(
-                    className="date-selector",
+                    className='col text-center',
                     children=[
                         dcc.DatePickerRange(
                             id='date-picker',
@@ -81,18 +83,18 @@ layout = html.Div(
                                 current_year, df['data'].max().month, 1),
                             start_date=df['data'].min(),
                             end_date=df['data'].max(),
-                            style={'color' : colors['text']}
                         ),
                     ],
                 ),
                 html.Div(
-                    className='price-slider-parent',
+                    className='col text-center',
                     children=[
                         html.Span(
                             'Faixa de Preço: R$ %s - R$ %s' % (
                                 df['preco'].min(), df['preco'].max()),
                             id='display-price-slider',
                             className="price-span",
+                            style={'color' : colors['text']}
                         ),
                         dcc.RangeSlider(
                             id='price-slider',
@@ -103,14 +105,14 @@ layout = html.Div(
                         )
                     ]
                 ),
-
                 html.Div(
-                    className='amount-slider-parent',
+                    className='col text-center',
                     children=[
                         html.Span(
                             'Quantidade: %s - %s' % (df['quantidade'].min(),
                                                     df['quantidade'].max()),
-                            id='display-amount-slider'
+                            id='display-amount-slider',
+                            style={'color' : colors['text']}
                         ),
                         dcc.RangeSlider(
                             id='amount-slider',
@@ -124,8 +126,6 @@ layout = html.Div(
                 ),
             ]
         ),
-
-
 
         html.Div(
             style={'textAlign': 'center'},
@@ -247,7 +247,7 @@ def update_data(start_date, end_date, price_limit, amount_limit, state_click):
     [Input('price-slider', 'value')]
 )
 def update_price_slider(limits):
-    return 'Faixa de Preço: %sR$ - %sR$' % (limits[0], limits[1])
+    return 'Faixa de Preço: R$%s - R$%s' % (limits[0], limits[1])
 
 
 @app.callback(
