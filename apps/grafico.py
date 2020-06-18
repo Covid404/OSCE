@@ -76,6 +76,7 @@ layout = html.Div(
                                 current_year, df['data'].max().month, 1),
                             start_date=df['data'].min(),
                             end_date=df['data'].max(),
+                            style={'color' : 'white'}
                         ),
                     ],
                 ),
@@ -123,6 +124,7 @@ layout = html.Div(
 
         html.Div(
             style={'textAlign': 'center'},
+            className="table-parent",
             children=[
                 dash_table.DataTable(
                     id='table',
@@ -137,6 +139,11 @@ layout = html.Div(
                     data=df.assign(
                         **df.select_dtypes(['datetime']).astype(str).to_dict('list')
                     ).to_dict('records'),
+                    style_header={
+                        'backgroundColor': 'white',
+                        'fontWeight': 'bold',
+                        'fontSize' : '18px',
+                    },
                     style_cell={'textAlign': 'center'},
                     style_cell_conditional=[
                         {
@@ -161,15 +168,15 @@ layout = html.Div(
                         },
                         {
                             'if': {'column_id': 'preco'},
-                            'width': '102px',
-                            'minWidth': '102px',
-                            'maxWidth': '102px'
+                            'width': '75px',
+                            'minWidth': '75px',
+                            'maxWidth': '75px'
                         },
                         {
                             'if': {'column_id': 'quantidade'},
-                            'width': '102px',
-                            'minWidth': '102px',
-                            'maxWidth': '102px'
+                            'width': '63px',
+                            'minWidth': '63px',
+                            'maxWidth': '63px'
                         },
                         {
                             'if': {'column_id': 'anomalo'},
@@ -184,8 +191,22 @@ layout = html.Div(
                             'textAlign': 'left',
                         },
                         {
-                            'if': {'filter_query': '{{anomalo}} = {}'.format(-1), },
-                            'backgroundColor': '#fff3cd',
+                            'if': {'row_index' : 'odd'},
+                            'backgroundColor' : 'rgb(248, 248, 248)'
+                        },
+                        {
+                            'if': {'row_index' : 'even'},
+                            'backgroundColor' : 'rgb(230, 230, 230)'
+                        },
+                        {
+                            'if': {'filter_query': '{{anomalo}} = {}'.format(-1),
+                                    'row_index' : 'odd'},
+                            'backgroundColor' : 'rgb(255, 205, 208)'
+                        },
+                        {
+                            'if': {'filter_query': '{{anomalo}} = {}'.format(-1),
+                                    'row_index' : 'even'},
+                            'backgroundColor' : 'rgb(255, 186, 191)'
                         },
                     ],
                     tooltip_data=[
@@ -194,6 +215,7 @@ layout = html.Div(
                         } for row in df.to_dict('rows')
                     ],
                     tooltip_duration=None,
+                    style_as_list_view=True,
                 )
             ]
         )
