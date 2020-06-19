@@ -110,7 +110,7 @@ def create_row(row):
             elif index == 'Anomalia':
                 tr_children.append(
                     html.Td(
-                        title='Anomalia: {}\nStatus: {}'.format(value, row['anomalo_label']),
+                        title='Nível: {}\nStatus: {}'.format(value, row['anomalo_label']),
                         children=html.Div(
                             className='progress',
                             children=html.Div(
@@ -141,7 +141,7 @@ def create_row(row):
 
 def update_table(df):
     return html.Table(
-        className='table table-sm',
+        className='table table-sm table-hover',
         style={'backgroundColor': 'white'},
         children=[
             html.Thead(
