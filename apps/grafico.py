@@ -27,15 +27,16 @@ map_df = map_df[['estado', 'anomalo']].groupby('estado', as_index=False).mean()
 map_df = map_df.rename(columns={'anomalo': 'media de anomalia'})
 
 fig = px.choropleth(map_df,
-    geojson=geojson_uf,
-    locations='estado',
-    color='media de anomalia',
-    featureidkey='properties.UF_05',
-    scope='south america',
-    color_continuous_scale='ylorrd'
-)
+                    geojson=geojson_uf,
+                    locations='estado',
+                    color='media de anomalia',
+                    featureidkey='properties.UF_05',
+                    scope='south america',
+                    color_continuous_scale='ylorrd'
+                    )
 
-fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0}, clickmode='event+select')
+fig.update_layout(margin={"r": 0, "t": 0, "l": 0,
+                          "b": 0}, clickmode='event+select')
 
 anomaly_colors = []
 for color in px.colors.sequential.YlOrRd:
@@ -87,6 +88,7 @@ def update_dataframe(df, start_date, end_date, price_limit, amount_limit, states
     )
     return updated_df
 
+
 def get_anomaly_color(value):
     color_index = 0
     anomaly = 0
@@ -96,6 +98,7 @@ def get_anomaly_color(value):
 
     return anomaly_colors[color_index]
 
+
 def create_row(row):
     tr_children = []
     for index, value in row.iteritems():
@@ -103,8 +106,13 @@ def create_row(row):
             if index == 'Compra':
                 tr_children.append(
                     html.Td(
-                        style={'fontSize': 'small', 'textAlign': 'center'},
-                        children=[value, ' (', html.A('Fonte', href=row['Fonte']), ')']
+                        style={
+                            'fontSize': 'small',
+                            'textAlign': 'center',
+                            'width': '70%'
+                        },
+                        children=[
+                            value, ' (', html.A('Fonte', href=row['Fonte']), ')']
                     )
                 )
             elif index == 'Anomalia':
@@ -113,6 +121,9 @@ def create_row(row):
                         title='Nível: {}\nStatus: {}'.format(value, row['anomalo_label']),
                         children=html.Div(
                             className='progress',
+                            style={
+                                'backgroundColor': '#cfcfcf'
+                            },
                             children=html.Div(
                                 className='progress-bar',
                                 style={
@@ -121,12 +132,47 @@ def create_row(row):
                                 },
                                 role="progressbar",
                                 **{
-                                    'aria-valuenow':"{}".format(value*10),
-                                    'aria-valuemin':"0",
-                                    'aria-valuemax':"100"
+                                    'aria-valuenow': "{}".format(value*10),
+                                    'aria-valuemin': "0",
+                                    'aria-valuemax': "100"
                                 }
                             )
                         )
+                    )
+                )
+            elif index == 'Data':
+                if row['Data'] == 'NaT':
+                    unknown_date = 'Sem data definida'
+                    tr_children.append(
+                        html.Td(
+                            style={'fontSize': 'small', 'textAlign': 'center'},
+                            children=unknown_date
+                        )
+                    )
+                else:
+                    olddate = dt.strptime(row['Data'], '%Y-%m-%d')
+                    newdate = str(olddate.strftime('%d/%m/%Y'))
+                    tr_children.append(
+                        html.Td(
+                            style={'fontSize': 'small', 'textAlign': 'center'},
+                            children=newdate
+                        )
+                    )
+            elif index == 'Preço/Unidade':
+                value = '%.2f' % value
+                preco = list(str(value)[::-1])[3:]
+                decimal = list(str(value)[::-1])[:2]
+                decimal.reverse()
+                for i in range(len(preco) - 1):
+                    if i != 0 and i % 3 == 0:
+                        preco.insert(i, '.')
+                preco.reverse()
+                formated_value = 'R$ %s,%s ' % (
+                    ''.join(preco), ''.join(decimal))
+                tr_children.append(
+                    html.Td(
+                        style={'fontSize': 'small', 'textAlign': 'center'},
+                        children=formated_value
                     )
                 )
             else:
@@ -139,6 +185,7 @@ def create_row(row):
 
     return html.Tr(children=tr_children)
 
+
 def update_table(df):
     return html.Table(
         className='table table-sm table-hover',
@@ -148,7 +195,8 @@ def update_table(df):
                 className='thead-light',
                 children=html.Tr(
                     [
-                        html.Th(column, style={'fontSize': 'small', 'textAlign': 'center'})
+                        html.Th(column, style={
+                                'fontSize': 'small', 'textAlign': 'center'})
                         for column in df.columns if column not in ['Fonte', 'anomalo_label']
                     ]
                 )
@@ -159,17 +207,21 @@ def update_table(df):
         ]
     )
 
+
 layout = html.Div(
     children=[
         html.H3(
             id='dados-estado',
             children='Dados de Compras de Respiradores',
-            style={'textAlign': 'center',
-                    'color': colors['text']}
+            style={
+                'textAlign': 'center',
+                'color': colors['text'],
+                'marginTop': '1%'
+            }
         ),
 
         html.Div(
-            className='row row-cols-1 row-cols-md-3 mt-1',
+            className='row row-cols-1 row-cols-md-3 mt-5',
             children=[
                 html.Div(
                     className='col text-center',
@@ -189,12 +241,17 @@ layout = html.Div(
                 html.Div(
                     className='col text-center',
                     children=[
-                        html.Span(
-                            'Faixa de Preço: R$ %s - R$ %s' % (
-                                df['preco'].min(), df['preco'].max()),
-                            id='display-price-slider',
-                            className="price-span",
-                            style={'color' : colors['text']}
+                        html.Div(
+                            html.Span(
+                                'Faixa de Preço: R$ %s - R$ %s' % (
+                                    df['preco'].min(), df['preco'].max()),
+                                id='display-price-slider',
+                                className="price-span",
+                            ),
+                            style={
+                                'color': colors['text'],
+                                'marginBottom': '1%',
+                            }
                         ),
                         dcc.RangeSlider(
                             id='price-slider',
@@ -208,11 +265,16 @@ layout = html.Div(
                 html.Div(
                     className='col text-center',
                     children=[
-                        html.Span(
-                            'Quantidade: %s - %s' % (df['quantidade'].min(),
-                                                    df['quantidade'].max()),
-                            id='display-amount-slider',
-                            style={'color' : colors['text']}
+                        html.Div(
+                            html.Span(
+                                'Quantidade: %s - %s' % (df['quantidade'].min(),
+                                                         df['quantidade'].max()),
+                                id='display-amount-slider',
+                            ),
+                            style={
+                                'color': colors['text'],
+                                'marginBottom': '1%',
+                            }
                         ),
                         dcc.RangeSlider(
                             id='amount-slider',
@@ -228,29 +290,47 @@ layout = html.Div(
         ),
 
         html.Div(
-            className='row',
+            className='d-flex justify-content-center mt-3',
+            style={
+                'minHeight': '66vh'
+            },
             children=[
                 html.Div(
-                    className='col-12 p-0',
-                    children=dcc.Graph(
-                        id="choropleth",
-                        figure=fig,
-                    ),
-                    style={'maxWidth': '30%'}
-                ),
-                html.Div(
-                    className='col-12 p-0',
-                    children=html.Div(
-                        id='data-table',
-                        className='table-responsive',
-                    ),
-                    style={'maxWidth': '70%', 'maxHeight': '450px', 'overflow': 'auto'},
+                    className='row',
+                    style={
+                        'width': '98%',
+                    },
+                    children=[
+                        html.Div(
+                            className='col-12 p-0',
+                            children=dcc.Graph(
+                                id="choropleth",
+                                figure=fig,
+                            ),
+                            style={
+                                'maxWidth': '30%',
+                            }
+                        ),
+                        html.Div(
+                            className='col-12 p-0',
+                            children=html.Div(
+                                id='data-table',
+                                className='table-responsive table-striped',
+                            ),
+                            style={
+                                'maxWidth': '70%',
+                                'maxHeight': '66vh',
+                                'overflow': 'auto'
+                            },
+                        ),
+                    ]
                 ),
             ]
         ),
 
     ]
 )
+
 
 @app.callback(
     Output('data-table', 'children'),
@@ -263,7 +343,8 @@ layout = html.Div(
     ],
 )
 def update_data(start_date, end_date, price_limit, amount_limit, state_clicked):
-    updated_df = update_dataframe(df, start_date[:10], end_date[:10], price_limit, amount_limit, state_clicked)
+    updated_df = update_dataframe(
+        df, start_date[:10], end_date[:10], price_limit, amount_limit, state_clicked)
     return update_table(updated_df)
 
 

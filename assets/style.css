@@ -8,9 +8,8 @@ body {
 
 .container {
     background-color: #343a40;
-    max-width: 1200px !important; 
+    max-width: 95% !important; 
     margin-top: 1%;
-    margin-bottom: 2%;
     border-radius: 1%;
     padding-bottom: 1%;
     padding-top: 1%;
