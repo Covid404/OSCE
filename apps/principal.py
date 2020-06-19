@@ -21,18 +21,27 @@ with open('data/geojson_uf.json') as response:
 
 map_df = pd.read_csv('data/predictions.csv')
 map_df = map_df[map_df['anomalo'] != 1]
-map_df = map_df[['estado', 'anomalo']].groupby('estado', as_index=False).count()
+map_df = map_df.sort_values('anomalo', ascending=False)[:5]
+map_df = map_df[['estado', 'anomalo']].groupby('estado', as_index=False).mean()
+map_df = map_df.rename(columns={'anomalo': 'media de anomalia'})
+map_df = map_df.sort_values('media de anomalia', ascending=False)[:5]
 
 fig = px.choropleth(map_df,
                     geojson=geojson_uf,
                     locations='estado',
-                    color='anomalo',
+                    color='media de anomalia',
                     featureidkey='properties.UF_05',
                     scope='south america',
                     color_continuous_scale='ylorrd'
                     )
+
 fig.update_layout(margin={"r": 0, "t": 0, "l": 0,
                           "b": 0}, clickmode='event+select')
+
+colors = {
+    'background': '#343a40',
+    'text': 'white'
+}
 
 layout = html.Div(
     style={'textAlign': 'center'},
@@ -70,119 +79,114 @@ layout = html.Div(
             }
         ),
 
-        dash_table.DataTable(
-            id='table',
-            columns=[
-                {'name': 'Data', 'id': 'data'},
-                {'name': 'Estado', 'id': 'estado'},
-                {'name': 'Compra', 'id': 'nome'},
-                {'name': 'Preço', 'id': 'preco'},
-                {'name': 'Quantidade', 'id': 'quantidade'},
-            ],
-            column_selectable='multi',
-            data=df.assign(
-                **df.select_dtypes(['datetime']).astype(str).to_dict('list')
-            ).to_dict('records'),
-            style_header={
-                'backgroundColor': 'white',
-                'fontWeight': 'bold',
-                'fontSize': '18px',
-            },
-            style_cell={'textAlign': 'center'},
-            style_cell_conditional=[
-                {
-                    'if': {'column_id': 'data'},
-                    'width': '63px',
-                    'minWidth': '63px',
-                    'maxWidth': '63px'
-                },
-                {
-                    'if': {'column_id': 'estado'},
-                    'width': '63px',
-                    'minWidth': '63px',
-                    'maxWidth': '63px'
-                },
-                {
-                    'if': {'column_id': 'nome'},
-                    'width': '400px',
-                    'minWidth': '400px',
-                    'maxWidth': '400px',
-                    'overflow': 'hidden',
-                    'textOverflow': 'ellipsis',
-                },
-                {
-                    'if': {'column_id': 'preco'},
-                    'width': '75px',
-                    'minWidth': '75px',
-                    'maxWidth': '75px'
-                },
-                {
-                    'if': {'column_id': 'quantidade'},
-                    'width': '63px',
-                    'minWidth': '63px',
-                    'maxWidth': '63px'
-                },
-                {
-                    'if': {'column_id': 'anomalo'},
-                    'width': '0px',
-                    'minWidth': '0px',
-                    'maxWidth': '0px'
-                },
-            ],
-            style_data_conditional=[
-                {
-                    'if': {'column_id': 'nome'},
-                    'textAlign': 'left',
-                },
-                {
-                    'if': {'row_index': 'odd'},
-                    'backgroundColor': 'rgb(248, 248, 248)'
-                },
-                {
-                    'if': {'row_index': 'even'},
-                    'backgroundColor': 'rgb(230, 230, 230)'
-                },
-                {
-                    'if': {'filter_query': '{{anomalo}} = {}'.format(-1),
-                           'row_index': 'odd'},
-                    'backgroundColor': 'rgb(255, 205, 208)'
-                },
-                {
-                    'if': {'filter_query': '{{anomalo}} = {}'.format(-1),
-                           'row_index': 'even'},
-                    'backgroundColor': 'rgb(255, 186, 191)'
-                },
-                {
-                    'if': {'filter_query': '{Data} = NaT'},
-                    'content': 'Sem data definida'
-                }
-            ],
-            tooltip_data=[
-                {
-                    'nome': {'value': row['nome'], 'type': 'markdown'}
-                } for row in df.to_dict('rows')
-            ],
-            tooltip_duration=None,
-            style_as_list_view=True,
+        html.Div(
+            className='row row-cols-1 row-cols-md-3 mt-1',
+            children=[
+                html.Div(
+                    className='col text-center',
+                    children=[
+                        dcc.DatePickerRange(
+                            id='date-picker',
+                            display_format='D/M/Y',
+                            min_date_allowed=df['data'].min(),
+                            max_date_allowed=df['data'].max(),
+                            initial_visible_month=dt(
+                                current_year, df['data'].max().month, 1),
+                            start_date=df['data'].min(),
+                            end_date=df['data'].max(),
+                        ),
+                    ],
+                ),
+                html.Div(
+                    className='col text-center',
+                    children=[
+                        html.Span(
+                            'Faixa de Preço: R$ %s - R$ %s' % (
+                                df['preco'].min(), df['preco'].max()),
+                            id='display-price-slider',
+                            className="price-span",
+                            style={'color': colors['text']}
+                        ),
+                        dcc.RangeSlider(
+                            id='price-slider',
+                            min=df['preco'].min(),
+                            max=df['preco'].max(),
+                            step=1,
+                            value=[df['preco'].min(), df['preco'].max()],
+                        )
+                    ]
+                ),
+                html.Div(
+                    className='col text-center',
+                    children=[
+                        html.Span(
+                            'Quantidade: %s - %s' % (df['quantidade'].min(),
+                                                     df['quantidade'].max()),
+                            id='display-amount-slider',
+                            style={'color': colors['text']}
+                        ),
+                        dcc.RangeSlider(
+                            id='amount-slider',
+                            min=df['quantidade'].min(),
+                            max=df['quantidade'].max(),
+                            step=1,
+                            value=[df['quantidade'].min(
+                            ), df['quantidade'].max()],
+                        )
+                    ]
+                ),
+            ]
         ),
-        
+
+        html.Div(
+            className='d-flex justify-content-center',
+            children=[
+                html.Div(
+                    className='row',
+                    style={
+                        'width' : '95%',
+                    },
+                    children=[
+                        html.Div(
+                            className='col-12 p-0',
+                            children=dcc.Graph(
+                                id="choropleth",
+                                figure=fig,
+                            ),
+                            style={
+                                'maxWidth': '30%',
+                            }
+                        ),
+                        html.Div(
+                            className='col-12 p-0',
+                            children=html.Div(
+                                id='data-table',
+                                className='table-responsive table-striped',
+                            ),
+                            style={
+                                'maxWidth': '70%',
+                                'maxHeight': '450px',
+                                'overflow': 'auto'
+                            },
+                        ),
+                    ]
+                ),
+            ]
+        ),
+
         html.P(
             'Caso você deseje conferir a tabela por completo, basta clicar no botão abaixo.',
             style={
                 'color': 'rgba(255,255,255,0.9)',
-                'marginTop' : '2%'
+                'marginTop': '2%'
             }
         ),
-        html.Div(
-            className='button-parent',
-            children=[
-                html.A(
-                    'Redirecionar',
-                    id='redirect',
-                    className='btn btn-primary',
-                    href='/data'
-                )
-            ]
+
+        html.A(
+            'Redirecionar',
+            id='redirect',
+            className='btn btn-primary',
+            href='/data'
         )
     ]
 )
