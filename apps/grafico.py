@@ -3,7 +3,6 @@ import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.express as px
-import plotly.graph_objects as go
 import pandas as pd
 from datetime import datetime as dt
 from datetime import date
@@ -35,7 +34,7 @@ fig = px.choropleth(map_df,
     color_continuous_scale='ylorrd_r'
 )
 fig.update_layout(margin={"r": 0, "t": 0, "l": 0,
-                        "b": 0}, clickmode='event+select')
+                          "b": 0}, clickmode='event+select')
 
 def update_dataframe(df, start_date, end_date, price_limit, amount_limit, states_clicked):
     if states_clicked is not None:
@@ -200,6 +199,7 @@ layout = html.Div(
                 ),
             ]
         ),
+
     ]
 )
 
@@ -230,5 +230,8 @@ def update_price_slider(limits):
     Output('display-amount-slider', 'children'),
     [Input('amount-slider', 'value')]
 )
-def update_price_slider(limits):
+def update_amount_slider(limits):
     return 'Quantidade: %s - %s' % (limits[0], limits[1])
+
+# for data in df['data']:
+#     print(pd.isnull(data))
