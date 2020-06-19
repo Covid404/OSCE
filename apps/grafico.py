@@ -25,17 +25,26 @@ current_year = 2020
 map_df = pd.read_csv('data/predictions.csv')
 map_df = map_df[map_df['anomalo'] != 1]
 map_df = map_df[['estado', 'anomalo']].groupby('estado', as_index=False).mean()
+map_df = map_df.rename(columns={'anomalo': 'media de anomalia'})
 
 fig = px.choropleth(map_df,
     geojson=geojson_uf,
     locations='estado',
-    color='anomalo',
+    color='media de anomalia',
     featureidkey='properties.UF_05',
     scope='south america',
-    color_continuous_scale='ylorrd_r'
+    color_continuous_scale='ylorrd'
 )
-fig.update_layout(margin={"r": 0, "t": 0, "l": 0,
-                        "b": 0}, clickmode='event+select')
+fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0}, clickmode='event+select')
+
+anomaly_colors = []
+for color in px.colors.sequential.YlOrRd:
+    anomaly_colors += [
+        color.replace(')', ',{})'.format(0.25)),
+        color.replace(')', ',{})'.format(0.50)),
+        color.replace(')', ',{})'.format(0.75)),
+        color.replace(')', ',{})'.format(1))
+    ]
 
 def update_dataframe(df, start_date, end_date, price_limit, amount_limit, states_clicked):
     if states_clicked is not None:
@@ -68,7 +77,8 @@ def update_dataframe(df, start_date, end_date, price_limit, amount_limit, states
         'estado': 'UF',
         'nome': 'Compra',
         'preco': 'Preço/Unidade',
-        'quantidade': 'Unidades'
+        'quantidade': 'Unidades',
+        'anomalo': 'Anomalia'
     })
 
     updated_df = updated_df.assign(
@@ -76,32 +86,69 @@ def update_dataframe(df, start_date, end_date, price_limit, amount_limit, states
     )
     return updated_df
 
+def get_anomaly_color(value):
+    color_index = 0
+    anomaly = 0
+    while anomaly < value and color_index < 35:
+        anomaly += 0.277
+        color_index += 1
+
+    return anomaly_colors[color_index]
+
 def create_row(row):
     tr_children = []
     for index, value in row.iteritems():
-        if index not in ['anomalo', 'Fonte']:
+        if index not in ['Fonte', 'anomalo_label']:
             if index == 'Compra':
-                style = {'fontSize': 'small', 'textAlign': 'center'}
-                td_children = [value, ' (', html.A('Fonte', href=row['Fonte']), ')']
+                tr_children.append(
+                    html.Td(
+                        style={'fontSize': 'small', 'textAlign': 'center'},
+                        children=[value, ' (', html.A('Fonte', href=row['Fonte']), ')']
+                    )
+                )
+            elif index == 'Anomalia':
+                tr_children.append(
+                    html.Td(
+                        title='Anomalia: {}\nStatus: {}'.format(value, row['anomalo_label']),
+                        children=html.Div(
+                            className='progress',
+                            children=html.Div(
+                                className='progress-bar',
+                                style={
+                                    'width': '{}%'.format(value*10),
+                                    'backgroundColor': get_anomaly_color(value)
+                                },
+                                role="progressbar",
+                                **{
+                                    'aria-valuenow':"{}".format(value*10),
+                                    'aria-valuemin':"0",
+                                    'aria-valuemax':"100"
+                                }
+                            )
+                        )
+                    )
+                )
             else:
-                style = {'fontSize': 'small', 'textAlign': 'center'}
-                td_children = [value]
-            tr_children.append(html.Td(style=style, children=td_children))
+                tr_children.append(
+                    html.Td(
+                        style={'fontSize': 'small', 'textAlign': 'center'},
+                        children=value
+                    )
+                )
 
-    if row['anomalo'] < 5:
-        return html.Tr(className='suspeito', children=tr_children)
     return html.Tr(children=tr_children)
 
 def update_table(df):
     return html.Table(
-        className='table table-sm table-hover',
+        className='table table-sm',
         style={'backgroundColor': 'white'},
         children=[
             html.Thead(
-                html.Tr(
+                className='thead-light',
+                children=html.Tr(
                     [
                         html.Th(column, style={'fontSize': 'small', 'textAlign': 'center'})
-                        for column in df.columns if column not in ['anomalo', 'Fonte']
+                        for column in df.columns if column not in ['Fonte', 'anomalo_label']
                     ]
                 )
             ),
@@ -113,7 +160,7 @@ def update_table(df):
 
 layout = html.Div(
     children=[
-        html.H1(
+        html.H3(
             id='dados-estado',
             children='Dados de Compras de Respiradores',
             style={'textAlign': 'center',
