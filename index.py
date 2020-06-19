@@ -4,7 +4,7 @@ from dash.dependencies import Input, Output
 
 from app import app
 from app import server
-from apps import grafico, quem_somos, principal
+from apps import grafico, quem_somos, principal, como_funciona
 
 
 app.layout = html.Div([
@@ -27,6 +27,11 @@ app.layout = html.Div([
                                 'Dados completos',
                                 className='nav-item nav-link',
                                 href='/data'
+                            ),
+                            html.A(
+                                'Como Funciona',
+                                className='nav-item nav-link',
+                                href='/como_funciona',
                             ),
                             html.A(
                                 'Quem somos',
@@ -53,6 +58,8 @@ def display_page(pathname):
         return quem_somos.layout
     elif pathname == '/data':
         return grafico.layout
+    elif pathname == '/como_funciona':
+        return como_funciona.layout
     else:
         return '404'
 
