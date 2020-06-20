@@ -5,7 +5,8 @@ from datetime import datetime as dt
 
 def get_df(path='data/predictions.csv'):
     df = pd.read_csv(path)
-    df['data'] = pd.to_datetime(df['data'])
+    df['data'] = pd.to_datetime(df['data'], format="%d/%m/%Y")
+    print(df['data'])
     return df
 
 anomaly_colors = []
@@ -51,6 +52,7 @@ def get_renamed_df(df):
             'estado': 'UF',
             'nome': 'Compra',
             'preco': 'Preço/Unidade',
+            'valor_total': 'Valor Total',
             'quantidade': 'Unidades',
             'anomalo': 'Suspeitômetro'
         }

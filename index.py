@@ -31,7 +31,7 @@ app.layout = html.Div([
                             html.A(
                                 'Sobre',
                                 className='nav-item nav-link',
-                                href='/como_funciona',
+                                href='/sobre',
                             ),
                             html.A(
                                 'Quem somos',
@@ -58,7 +58,7 @@ def display_page(pathname):
         return quem_somos.layout
     elif pathname == '/data':
         return grafico.layout
-    elif pathname == '/como_funciona':
+    elif pathname == '/sobre':
         return como_funciona.layout
     else:
         return page_not_found.layout

@@ -137,8 +137,8 @@ layout = html.Div(
                             Ele funciona consultando e analisando periodicamente os gastos das
                             secretarias estaduais. Clique 
                         ''',
-                        html.A('AQUI', id='redirect', href='/como_funciona'),
-                        ' para saber mais.'
+                        html.A('AQUI', id='redirect', href='/sobre'),
+                        ' para saber mais,'
                     ]
                 ),
             ]
