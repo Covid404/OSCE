@@ -69,6 +69,10 @@ body {
     text-align: center;
 }
 
+.table td{
+    border-top: none;
+}
+
 .item-container { 
     position: relative;
     height: 100%;
