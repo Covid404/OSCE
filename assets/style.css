@@ -64,7 +64,7 @@ body {
 .DateInput_input.DateInput_input_1,
 .DateRangePickerInput_arrow_svg.DateRangePickerInput_arrow_svg_1{
     background-color: #343a40;
-    color: white;
-    fill: white;
+    color: rgba(255,255,255,0.9);
+    fill: rgba(255,255,255,0.9);
     text-align: center;
 }
