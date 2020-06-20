@@ -56,9 +56,9 @@ layout = html.Div(
                             html.Div(
                                 className='card-header',
                                 children=html.H4(
-                                    'Top 5 Suspeitômetro',
+                                    'Ranking - Compras mais suspeitas',
                                     style={
-                                        'color': 'rgb(255, 112, 112)',
+                                        'color': 'rgb(64, 64, 64)',
                                         'marginBottom': 0,
                                         'fontWeight': 'bold'
                                     }
