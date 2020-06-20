@@ -82,7 +82,7 @@ layout = html.Div(
     children=[
         html.H3(
             id='dados-estado',
-            children='Dados de Compras de Ventiladores',
+            children='Compras de ventiladores',
             style={
                 'textAlign': 'center',
                 'color': colors['text'],
