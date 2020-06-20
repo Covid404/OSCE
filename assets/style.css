@@ -68,3 +68,20 @@ body {
     fill: white;
     text-align: center;
 }
+
+.item-container { 
+    position: relative;
+    height: 100%;
+    -webkit-animation: slide 0.5s forwards;
+    animation: slide 0.5s forwards;
+    overflow: hidden;
+}
+
+@keyframes slide {
+    from {
+        left: 100%;
+    }
+    to {
+        left: 0;
+    }
+}
