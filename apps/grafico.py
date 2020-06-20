@@ -131,7 +131,8 @@ def create_row(row):
             elif index == 'Suspeitômetro':
                 tr_children.append(
                     html.Td(
-                        title='Nível: {}\nStatus: {}'.format(value, row['anomalo_label']),
+                        title='Nível: {}\nStatus: {}'.format(
+                            value, row['anomalo_label']),
                         children=html.Div(
                             className='progress',
                             style={'backgroundColor': '#cfcfcf'},
