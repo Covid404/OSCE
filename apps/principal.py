@@ -1,47 +1,48 @@
-import json
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
-import plotly.express as px
 from datetime import datetime as dt
 from datetime import date
 import pandas as pd
 import dash_table
 from app import app
-from apps import grafico, quem_somos
+from apps import grafico
 
 df = pd.read_csv('data/predictions.csv')
 df['data'] = pd.to_datetime(df['data'])
 current_year = 2020
 
-df = df.sort_values('preco', ascending=False)[:5]
-
-with open('data/geojson_uf.json') as response:
-    geojson_uf = json.load(response)
-
-map_df = pd.read_csv('data/predictions.csv')
-map_df = map_df[map_df['anomalo'] != 1]
-map_df = map_df.sort_values('anomalo', ascending=False)[:5]
-map_df = map_df[['estado', 'anomalo']].groupby('estado', as_index=False).mean()
-map_df = map_df.rename(columns={'anomalo': 'media de anomalia'})
-map_df = map_df.sort_values('media de anomalia', ascending=False)[:5]
-
-fig = px.choropleth(map_df,
-                    geojson=geojson_uf,
-                    locations='estado',
-                    color='media de anomalia',
-                    featureidkey='properties.UF_05',
-                    scope='south america',
-                    color_continuous_scale='ylorrd'
-                    )
-
-fig.update_layout(margin={"r": 0, "t": 0, "l": 0,
-                          "b": 0}, clickmode='event+select')
+df = df.sort_values('anomalo', ascending=False)[:5]
 
 colors = {
     'background': '#343a40',
     'text': 'white'
 }
+
+
+def update_table(df):
+    updated_df = grafico.update_dataframe(df, str(df['data'].min())[:10], str(df['data'].max())[
+        :10], [0, df['preco'].max()], [0, df['quantidade'].max()], None)
+    return html.Table(
+        className='table table-sm table-hover',
+        style={'backgroundColor': 'white'},
+        children=[
+            html.Thead(
+                className='thead-light',
+                children=html.Tr(
+                    [
+                        html.Th(column, style={
+                                'fontSize': 'small', 'textAlign': 'center'})
+                        for column in updated_df.columns if column not in ['Fonte', 'anomalo_label']
+                    ]
+                )
+            ),
+            html.Tbody(
+                [grafico.create_row(row)
+                    for index, row in updated_df.iterrows()]
+            ),
+        ]
+    )
+
 
 layout = html.Div(
     style={'textAlign': 'center'},
@@ -80,96 +81,16 @@ layout = html.Div(
         ),
 
         html.Div(
-            className='row row-cols-1 row-cols-md-3 mt-1',
-            children=[
-                html.Div(
-                    className='col text-center',
-                    children=[
-                        dcc.DatePickerRange(
-                            id='date-picker',
-                            display_format='D/M/Y',
-                            min_date_allowed=df['data'].min(),
-                            max_date_allowed=df['data'].max(),
-                            initial_visible_month=dt(
-                                current_year, df['data'].max().month, 1),
-                            start_date=df['data'].min(),
-                            end_date=df['data'].max(),
-                        ),
-                    ],
-                ),
-                html.Div(
-                    className='col text-center',
-                    children=[
-                        html.Span(
-                            'Faixa de Preço: R$ %s - R$ %s' % (
-                                df['preco'].min(), df['preco'].max()),
-                            id='display-price-slider',
-                            className="price-span",
-                            style={'color': colors['text']}
-                        ),
-                        dcc.RangeSlider(
-                            id='price-slider',
-                            min=df['preco'].min(),
-                            max=df['preco'].max(),
-                            step=1,
-                            value=[df['preco'].min(), df['preco'].max()],
-                        )
-                    ]
-                ),
-                html.Div(
-                    className='col text-center',
-                    children=[
-                        html.Span(
-                            'Quantidade: %s - %s' % (df['quantidade'].min(),
-                                                     df['quantidade'].max()),
-                            id='display-amount-slider',
-                            style={'color': colors['text']}
-                        ),
-                        dcc.RangeSlider(
-                            id='amount-slider',
-                            min=df['quantidade'].min(),
-                            max=df['quantidade'].max(),
-                            step=1,
-                            value=[df['quantidade'].min(
-                            ), df['quantidade'].max()],
-                        )
-                    ]
-                ),
-            ]
-        ),
-
-        html.Div(
             className='d-flex justify-content-center',
             children=[
                 html.Div(
-                    className='row',
+                    className='table-responsive table-striped',
+                    children=update_table(df),
                     style={
-                        'width' : '95%',
+                        'maxWidth': '70%',
+                        'maxHeight': '50vh',
+                        'overflow': 'auto',
                     },
-                    children=[
-                        html.Div(
-                            className='col-12 p-0',
-                            children=dcc.Graph(
-                                id="choropleth",
-                                figure=fig,
-                            ),
-                            style={
-                                'maxWidth': '30%',
-                            }
-                        ),
-                        html.Div(
-                            className='col-12 p-0',
-                            children=html.Div(
-                                id='data-table',
-                                className='table-responsive table-striped',
-                            ),
-                            style={
-                                'maxWidth': '70%',
-                                'maxHeight': '450px',
-                                'overflow': 'auto'
-                            },
-                        ),
-                    ]
                 ),
             ]
         ),
@@ -183,7 +104,7 @@ layout = html.Div(
         ),
 
         html.A(
-            'Redirecionar',
+            'Visualizar',
             id='redirect',
             className='btn btn-primary',
             href='/data'
