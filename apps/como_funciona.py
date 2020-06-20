@@ -223,7 +223,7 @@ layout = [
             '.',
             '''
             Essas técnicas foram transformadas em módulos, que são executados em sequência
-            de acorco com a figura abaixo. Toda a solução foi implementada na linguagem de programação
+            de acordo com a figura abaixo. Toda a solução foi implementada na linguagem de programação
             ''',
             html.Span(
                 'Python',
