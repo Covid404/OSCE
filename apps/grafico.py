@@ -75,7 +75,7 @@ def update_dataframe(df, start_date, end_date, price_limit, amount_limit, states
     )
     return updated_df
 
-do_not_create = ['Fonte', 'anomalo_label']
+do_not_create = ['Fonte', 'anomalo_label', 'nome_original']
 def create_row(row):
     tr_children = []
     for index, value in row.iteritems():
@@ -87,8 +87,8 @@ def create_row(row):
                             'fontSize': 'small',
                             'textAlign': 'center',
                         },
-                        children=[
-                            value, ' (', html.A('Fonte', href=row['Fonte']), ')']
+                        title=row['nome_original'],
+                        children=value
                     )
                 )
             elif index == 'Suspeitômetro':
@@ -152,7 +152,7 @@ def update_table(df):
                     [
                         html.Th(column, style={
                                 'fontSize': 'small', 'textAlign': 'center'})
-                        for column in df.columns if column not in ['Fonte', 'anomalo_label']
+                        for column in df.columns if column not in do_not_create
                     ]
                 )
             ),

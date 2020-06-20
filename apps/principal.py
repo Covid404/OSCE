@@ -17,6 +17,7 @@ colors = {
     'text': 'rgba(255,255,255,0.9)'
 }
 
+do_not_create = ['Fonte', 'anomalo_label', 'nome_original']
 def create_top_five(df):
     renamed_df = utils.get_renamed_df(df)
 
@@ -43,7 +44,7 @@ def create_top_five(df):
     for index, row in renamed_df.iterrows():
         children = []
         for index, value in row.iteritems():
-            if index not in ['Fonte', 'anomalo_label']:
+            if index not in do_not_create:
                 if index == 'Compra':
                     children.append(
                         html.Div(
@@ -52,9 +53,8 @@ def create_top_five(df):
                                 'fontSize': 'small',
                                 'textAlign': 'center',
                             },
-                            title=value,
-                            children=[
-                                value, ' (', html.A('Fonte', href=row['Fonte']), ')']
+                            title=row['nome_original'],
+                            children=value
                         )
                     )
                 elif index == 'Suspeitômetro':
