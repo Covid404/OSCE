@@ -199,9 +199,10 @@ layout = html.Div(
                     className='text-center',
                     children='''
                     O COVIS é um sistema que utiliza inteligência artificial para
-                    fiscalizar os gastos públicos durante a pandemia e preza pela
-                    visualização simples e intuitiva dos gastos para a sociedade civil,
-                    ONGs, imprensa e até mesmo os órgãos fiscalizadores.
+                    monitorar os gastos públicos no combate à
+                    COVID-19. O COVIS preza pela
+                    visualização simples e intuitiva dos gastos para os órgãos
+                    fiscalizadores, ONGs, imprensa e sociedade civil.
                     '''
                 ),
                 html.Br(),
@@ -211,7 +212,7 @@ layout = html.Div(
                     Com a ciência de dados, o COVIS é capaz de alertar um gasto suspeito,
                     destoante de todos os outros de mesmo tipo feitos pelo país.
                     Ele funciona consultando e analisando periodicamente os gastos das
-                    secretarias estaduais de todos os 27 estados da federação.
+                    secretarias estaduais.
                     '''
                 ),
             ]
