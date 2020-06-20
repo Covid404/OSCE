@@ -1,10 +1,9 @@
 import dash_core_components as dcc
 import dash_html_components as html
-from datetime import datetime as dt
 import pandas as pd
 from app import app
 from apps import grafico
-import components.utils as utils
+from components import utils, table
 
 df = pd.read_csv('data/predictions.csv')
 df['data'] = pd.to_datetime(df['data'])
@@ -18,104 +17,17 @@ colors = {
 }
 
 do_not_create = ['Fonte', 'anomalo_label', 'nome_original']
-def create_top_five(df):
+def create_top_table(df):
     renamed_df = utils.get_renamed_df(df)
 
     renamed_df = renamed_df.assign(
         **renamed_df.select_dtypes(['datetime']).astype(str).to_dict('list')
     )
 
-    header_style = {'color':'#495057', 'fontSize': 'small', 'fontWeight': 'bold'}
-
-    top_five_rows = [
-        html.Div(
-            className='row mb-2',
-            style={'backgroundColor': '#e9ecef'},
-            children=[
-                html.Div('Compra', className='col p-1', style=header_style),
-                html.Div('Unidades', className='col p-1', style=header_style),
-                html.Div('Preço/Unidade', className='col p-1', style=header_style),
-                html.Div('Data', className='col p-1', style=header_style),
-                html.Div('Uf', className='col p-1', style=header_style),
-                html.Div('Suspeitômetro', className='col p-1', style=header_style)
-            ]
-        )
-    ]
-    for index, row in renamed_df.iterrows():
-        children = []
-        for index, value in row.iteritems():
-            if index not in do_not_create:
-                if index == 'Compra':
-                    children.append(
-                        html.Div(
-                            className='col p-1 d-block text-truncate',
-                            style={
-                                'fontSize': 'small',
-                                'textAlign': 'center',
-                            },
-                            title=row['nome_original'],
-                            children=value
-                        )
-                    )
-                elif index == 'Suspeitômetro':
-                    children.append(
-                        html.Div(
-                            className='col p-1',
-                            title='Nível: {}\nAlerta: {}'.format(value, row['anomalo_label']),
-                            children=html.Div(
-                                className='progress',
-                                style={'backgroundColor': '#cfcfcf'},
-                                children=html.Div(
-                                    className='progress-bar',
-                                    style={
-                                        'width': '{}%'.format(value*10),
-                                        'backgroundColor': utils.get_anomaly_color(value)
-                                    },
-                                    role="progressbar",
-                                    **{
-                                        'aria-valuenow': "{}".format(value*10),
-                                        'aria-valuemin': "0",
-                                        'aria-valuemax': "100"
-                                    }
-                                )
-                            )
-                        )
-                    )
-                elif index == 'Data':
-                    children.append(
-                        html.Div(
-                            className='col p-1',
-                            style={'fontSize': 'small', 'textAlign': 'center'},
-                            children=utils.get_formated_date(value)
-                        )
-                    )
-                elif index == 'Preço/Unidade':
-                    children.append(
-                        html.Div(
-                            className='col p-1',
-                            style={'fontSize': 'small', 'textAlign': 'center'},
-                            children=utils.get_formated_price(value)
-                        )
-                    )
-                else:
-                    children.append(
-                        html.Div(
-                            className='col p-1',
-                            style={'fontSize': 'small', 'textAlign': 'center'},
-                            children=value
-                        )
-                    )
-
-        top_five_rows.append(
-            html.Div(
-                className='row mb-2',
-                children=children
-            )
-        )
-
-
-
-    return top_five_rows
+    return html.Div(
+        className='table-responsive',
+        children=table.create_table(renamed_df, do_not_create)
+    )
 
 layout = html.Div(
     style={'textAlign': 'center'},
@@ -155,7 +67,7 @@ layout = html.Div(
 
                             html.Div(
                                 className='card-body',
-                                children=create_top_five(top_df)
+                                children=create_top_table(top_df)
                             )
                         ]
                     )
