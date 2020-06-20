@@ -5,7 +5,7 @@ from app import app
 from apps import grafico
 from components import utils, table
 
-df = pd.read_csv('data/predictions.csv')
+df = utils.get_df()
 df['data'] = pd.to_datetime(df['data'])
 current_year = 2020
 
@@ -68,6 +68,16 @@ layout = html.Div(
                             html.Div(
                                 className='card-body',
                                 children=create_top_table(top_df)
+                            ),
+                            
+                            html.Div(
+                                className='card-footer',
+                                children=html.A(
+                                    'Veja os Dados Completos',
+                                    id='redirect',
+                                    className='btn btn-primary btn-sm',
+                                    href='/data'
+                                ),
                             )
                         ]
                     )
@@ -81,12 +91,12 @@ layout = html.Div(
                         children=html.Div(
                             style={'margin': 'auto'},
                             children=[
-                                html.H4('As 5 compras mais suspeitas tiveram média de'),
+                                html.H4('As 5 compras mais suspeitas tiveram preço médio por unidade de'),
                                 html.H4(
                                     utils.get_formated_price(top_df['preco'].mean()),
                                     style={'fontWeight': 'bold'}
                                 ),
-                                html.H4('o que significa um possível superfaturamento de até'),
+                                html.H4('Isso significa um possível superfaturamento de até'),
                                 html.H4(
                                     '{}%'.format(
                                         str(top_df['preco'].mean() / df['preco'].mean()*100)[:6],
@@ -130,19 +140,32 @@ layout = html.Div(
             ]
         ),
 
+        html.Br(),
+        html.Br(),
+
         html.P(
-            'Caso deseje conferir os dados por completo, basta clicar no botão abaixo.',
-            style={
-                'color': 'rgba(255,255,255,0.9)',
-                'marginTop': '2%'
-            }
+            style={'color': colors['text']},
+            children='''
+                    Somos uma equipe de estudantes da Universidade Federal do
+                    Pará sem quaisquer fins lucrativos.
+                '''
         ),
 
-        html.A(
-            'Observatório',
-            id='redirect',
-            className='btn btn-primary',
-            href='/data'
+        html.P(
+            style={'color': colors['text']},
+            children='''
+                Por esse motivo, necessitamos do seu apoio!
+            '''
+        ),
+
+        html.P(
+            style={'color': colors['text']},
+            children=[
+                'Clique ',
+                html.A('AQUI', id='redirect', href='/quem_somos'),
+                ' e veja como você pode fazer parte disso.'
+            ]
         )
+
     ]
 )
