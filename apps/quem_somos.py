@@ -20,13 +20,30 @@ layout = html.Div([
                 'color' : 'rgba(255,255,255,0.9)'
             }
         ),
-        html.Ul(children=[html.Li(children=f'Líder: Asian Shay (https://github.com/aianshay)'),
-            html.Li(children='Web Dev: Alberto Costa (https://github.com/a-skz)'),
-            html.Li(children='Web Dev: Pedro Arouck (https://github.com/Arouck)'),
-            html.Li(children='Data Analyst: Renan Cunha (https://github.com/renan-cunha)'),
-            html.Li(children='Data Analyst: Renato Mota (https://github.com/Rjlmota)')],
+        html.P(),
+        html.Ul(children=[
+            html.Li(children=[html.B('CEO: '),
+            html.A(href='https://github.com/aianshay',children="Asian Shay")]),
+            html.Li(children=[html.B('Web Dev: '),
+            html.A(href='https://github.com/a-skz',children="Alberto Sobrinho")]),
+            html.Li(children=[html.B('Web Dev: '),
+            html.A(href='https://github.com/Arouck',children="Pedro Arouck")]),
+            html.Li(children=[html.B('Data Analyst: '),
+            html.A(href='https://github.com/renan-cunha',children="Renan cunha")]),
+            html.Li(children=[html.B('Data Analyst: '),
+            html.A(href='https://github.com/Rjlmota',children="Renato Mota")])],
                           style={'textAlign': 'center',
                 'color' : 'rgba(255,255,255,0.9)'
-            })
+            }),
+        html.P(),
+        html.Div(children=[
+            f'Esse website foi desenvolvido durante o ', 
+            html.A(children='Hackaton Serpro 2020 ',
+                   href='https://www.serpro.gov.br/menu/quem-somos/eventos/hackserpro/hackserpro-online')],
+            style={
+                'textAlign': 'center',
+                'color' : 'rgba(255,255,255,0.9)'
+            }
+        ),
 ])
 
