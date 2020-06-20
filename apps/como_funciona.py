@@ -28,7 +28,6 @@ def save_slide_index(prev, prox):
         index = 0
     elif index < 0:
         index = 3
-    print(index)
     return index
 
 
