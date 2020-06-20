@@ -29,7 +29,7 @@ layout = html.Div([
             html.Li(children=[html.B('Web Dev: '),
             html.A(href='https://github.com/Arouck',children="Pedro Arouck")]),
             html.Li(children=[html.B('Data Analyst: '),
-            html.A(href='https://github.com/renan-cunha',children="Renan cunha")]),
+            html.A(href='https://github.com/renan-cunha',children="Renan Cunha")]),
             html.Li(children=[html.B('Data Analyst: '),
             html.A(href='https://github.com/Rjlmota',children="Renato Mota")])],
                           style={'textAlign': 'center',
