@@ -15,7 +15,7 @@ with open('data/geojson_uf.json') as response:
 
 colors = {
     'background': '#343a40',
-    'text': 'white'
+    'text': 'rgba(255,255,255,0.9)'
 }
 
 df = utils.get_df()
@@ -94,7 +94,7 @@ def create_row(row):
             elif index == 'Suspeitômetro':
                 tr_children.append(
                     html.Td(
-                        title='Nível: {}\nStatus: {}'.format(
+                        title='Nível: {}\nAlerta: {}'.format(
                             value, row['anomalo_label']
                         ),
                         children=html.Div(
@@ -144,7 +144,7 @@ def create_row(row):
 def update_table(df):
     return html.Table(
         className='table table-sm table-striped',
-        style={'backgroundColor': 'white'},
+        style={'backgroundColor': colors['text']},
         children=[
             html.Thead(
                 className='thead-light',
