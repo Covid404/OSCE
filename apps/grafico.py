@@ -118,7 +118,8 @@ def create_row(row):
             elif index == 'Anomalia':
                 tr_children.append(
                     html.Td(
-                        title='Nível: {}\nStatus: {}'.format(value, row['anomalo_label']),
+                        title='Nível: {}\nStatus: {}'.format(
+                            value, row['anomalo_label']),
                         children=html.Div(
                             className='progress',
                             style={
@@ -353,7 +354,15 @@ def update_data(start_date, end_date, price_limit, amount_limit, state_clicked):
     [Input('price-slider', 'value')]
 )
 def update_price_slider(limits):
-    return 'Faixa de Preço: R$%s - R$%s' % (limits[0], limits[1])
+    formated_limits = []
+    for limit in limits:
+        preco = list(str(limit)[::-1])
+        for i in range(len(preco) - 1):
+            if i != 0 and i % 3 == 0:
+                preco.insert(i, '.')
+        preco.reverse()
+        formated_limits.append(''.join(preco))
+    return 'Faixa de Preço: R$ %s,00 - R$ %s,00' % (formated_limits[0], formated_limits[1])
 
 
 @app.callback(
@@ -362,6 +371,3 @@ def update_price_slider(limits):
 )
 def update_amount_slider(limits):
     return 'Quantidade: %s - %s' % (limits[0], limits[1])
-
-# for data in df['data']:
-#     print(pd.isnull(data))
