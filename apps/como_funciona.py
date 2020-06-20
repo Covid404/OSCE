@@ -3,37 +3,9 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 from app import app
 
-index = 0
-prev_clicks = 0
-prox_clicks = 0
-
-
-def save_slide_index(prev, prox):
-    global index
-    global prev_clicks
-    global prox_clicks
-
-    if prev == None:
-        prev = 0
-    if prox == None:
-        prox = 0
-
-    if prev_clicks < prev:
-        index -= 1
-        prev_clicks = prev
-    elif prox_clicks < prox:
-        index += 1
-        prox_clicks = prox
-    if index == 4:
-        index = 0
-    elif index < 0:
-        index = 3
-    return index
-
-
 slides = [
     html.Div(
-        className='item-container-1',
+        className='item-container',
         children=[
             html.Div(
                 children=[
@@ -70,7 +42,7 @@ slides = [
         ]
     ),
     html.Div(
-        className='item-container-2',
+        className='item-container',
         children=[
             html.Div(
                 children=[
@@ -104,7 +76,7 @@ slides = [
         ],
     ),
     html.Div(
-        className='item-container-3',
+        className='item-container',
         children=[
             html.Div(
                 children=[
@@ -148,7 +120,7 @@ slides = [
         ],
     ),
     html.Div(
-        className='item-container-4',
+        className='item-container',
         children=[
             html.Div(
                 children=[
@@ -268,10 +240,10 @@ layout = [
                 className='d-flex justify-content-center',
                 style={
                     'textAlign': 'center',
-                    'width': '70%',
+                    'width': '100%',
                     'display': 'flex',
                     'alignItems': 'center',
-                    'justifyContent': 'center'
+                    'justifyContent': 'center',
                 },
                 children=[
                     html.H2(
@@ -316,9 +288,8 @@ layout = [
     ),
 ]
 
-
 @app.callback(Output('slide', 'children'),
-              [
+            [
     Input('prev_slide', 'n_clicks'),
     Input('prox_slide', 'n_clicks')
 ])
@@ -326,7 +297,12 @@ def display_prev_slide(prev, prox):
     if prev == None and prox == None:
         return slides[0]
     else:
-        return slides[save_slide_index(prev, prox)]
+        if prev == None:
+            prev = 0
+        if prox == None:
+            prox = 0
+        new_index = (prox - prev) % 4
+        return slides[new_index]
 
 # @app.callback(Output('slide', 'children'),
 #               [Input('interval', 'n_intervals')])
