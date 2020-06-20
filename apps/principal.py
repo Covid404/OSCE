@@ -1,113 +1,175 @@
 import dash_core_components as dcc
 import dash_html_components as html
-from datetime import datetime as dt
-from datetime import date
 import pandas as pd
-import dash_table
 from app import app
 from apps import grafico
+from components import utils, table
 
-df = pd.read_csv('data/predictions.csv')
+df = utils.get_df()
 df['data'] = pd.to_datetime(df['data'])
 current_year = 2020
 
-df = df.sort_values('anomalo', ascending=False)[:5]
+top_df = df.sort_values('anomalo', ascending=False)[:5]
 
 colors = {
     'background': '#343a40',
-    'text': 'white'
+    'text': 'rgba(255,255,255,0.9)'
 }
 
+do_not_create = ['Fonte', 'anomalo_label', 'nome_original']
+def create_top_table(df):
+    renamed_df = utils.get_renamed_df(df)
 
-def update_table(df):
-    updated_df = grafico.update_dataframe(df, str(df['data'].min())[:10], str(df['data'].max())[
-        :10], [0, df['preco'].max()], [0, df['quantidade'].max()], None)
-    return html.Table(
-        className='table table-sm table-hover',
-        style={'backgroundColor': 'white'},
-        children=[
-            html.Thead(
-                className='thead-light',
-                children=html.Tr(
-                    [
-                        html.Th(column, style={
-                                'fontSize': 'small', 'textAlign': 'center'})
-                        for column in updated_df.columns if column not in ['Fonte', 'anomalo_label']
-                    ]
-                )
-            ),
-            html.Tbody(
-                [grafico.create_row(row)
-                    for index, row in updated_df.iterrows()]
-            ),
-        ]
+    renamed_df = renamed_df.assign(
+        **renamed_df.select_dtypes(['datetime']).astype(str).to_dict('list')
     )
 
+    return html.Div(
+        className='table-responsive',
+        children=table.create_table(renamed_df, do_not_create)
+    )
 
 layout = html.Div(
     style={'textAlign': 'center'},
-    className="table-parent",
     children=[
+
         html.Div(
             className='presentation-text-container',
+            style={'marginBottom': '2%'},
             children=[
                 html.H2(
-                    'COVIS - Sistema de rastreamento de fraude',
-                    style={
-                        'color': 'rgba(255,255,255,0.9)',
-                        'marginBottom': '2%'
-                    }
+                    'COVIS - Sistema de Monitoramento de Compras Públicas',
+                    style={'color': colors['text']}
                 ),
-                html.Span(
-                    'Bla bla bla bla - textinho do ASIAN CEO',
-                    style={
-                        'color': 'rgba(255,255,255,0.9)',
-                        'fontSize': '20px',
-                        'fontWeight': '500'
-                    }
-                )
             ],
-            style={
-                'marginBottom': '2%'
-            }
-        ),
-
-        html.H3(
-            'Top 5 Fraudes',
-            style={
-                'color': '#ff7070',
-                'marginBottom': '2%'
-            }
         ),
 
         html.Div(
-            className='d-flex justify-content-center',
+            className='row',
             children=[
                 html.Div(
-                    className='table-responsive table-striped',
-                    children=update_table(df),
-                    style={
-                        'maxWidth': '70%',
-                        'maxHeight': '50vh',
-                        'overflow': 'auto',
-                    },
+                    className='col-8',
+                    children=html.Div(
+                        className='card bg-light',
+                        style={'height': '100%'},
+                        children=[
+                            html.Div(
+                                className='card-header',
+                                children=html.H4(
+                                    'Top 5 Suspeitômetro',
+                                    style={
+                                        'color': 'rgb(255, 112, 112)',
+                                        'marginBottom': 0,
+                                        'fontWeight': 'bold'
+                                    }
+                                )
+                            ),
+
+                            html.Div(
+                                className='card-body',
+                                children=create_top_table(top_df)
+                            ),
+                            
+                            html.Div(
+                                className='card-footer',
+                                children=html.A(
+                                    'Veja os Dados Completos',
+                                    id='redirect',
+                                    className='btn btn-primary btn-sm',
+                                    href='/data'
+                                ),
+                            )
+                        ]
+                    )
+                ),
+
+                html.Div(
+                    className='col-4',
+                    children=html.Div(
+                        className='jumbotron p-3 mb-0',
+                        style={'height': '100%'},
+                        children=html.Div(
+                            style={'margin': 'auto'},
+                            children=[
+                                html.H4('As 5 compras mais suspeitas tiveram preço médio por unidade de'),
+                                html.H4(
+                                    utils.get_formated_price(top_df['preco'].mean()),
+                                    style={'fontWeight': 'bold'}
+                                ),
+                                html.H4('Isso significa um possível superfaturamento de até'),
+                                html.H4(
+                                    '{}%'.format(
+                                        str(top_df['preco'].mean() / df['preco'].mean()*100)[:6],
+                                    ),
+                                    style={'fontWeight': 'bold'}
+                                ),
+                                html.H4('em relação à média nacional.')
+                            ]
+                        )
+                    )
+                )
+            ]
+        ),
+
+        html.Br(),
+        html.Br(),
+
+        html.Div(
+            className='jumbotron p-3 mb-0',
+            children=[
+                html.H5(
+                    className='text-center',
+                    children='''
+                        O COVIS é um sistema que utiliza inteligência artificial para
+                        monitorar os gastos públicos no combate à
+                        COVID-19. O COVIS preza pela
+                        visualização simples e intuitiva dos gastos para os órgãos
+                        fiscalizadores, ONGs, imprensa e sociedade civil.
+                    '''
+                ),
+                html.Br(),
+                html.H5(
+                    className='text-center',
+                    children=[
+                        '''
+                            Com a ciência de dados, o COVIS é capaz de alertar um gasto suspeito,
+                            destoante de todos os outros de mesmo tipo feitos pelo país.
+                            Ele funciona consultando e analisando periodicamente os gastos das
+                            secretarias estaduais. Clique 
+                        ''',
+                        html.A('AQUI', id='redirect', href='/como_funciona'),
+                        ' para saber mais,'
+                    ]
                 ),
             ]
         ),
 
+        html.Br(),
+        html.Br(),
+
         html.P(
-            'Caso você deseje conferir a tabela por completo, basta clicar no botão abaixo.',
-            style={
-                'color': 'rgba(255,255,255,0.9)',
-                'marginTop': '2%'
-            }
+            style={'color': colors['text']},
+            children='''
+                    Somos uma equipe de estudantes da Universidade Federal do
+                    Pará sem quaisquer fins lucrativos.
+                '''
         ),
 
-        html.A(
-            'Visualizar',
-            id='redirect',
-            className='btn btn-primary',
-            href='/data'
+        html.P(
+            style={'color': colors['text']},
+            children='''
+                Por esse motivo, necessitamos do seu apoio!
+            '''
+        ),
+
+        html.P(
+            style={'color': colors['text']},
+            children=[
+                'Clique ',
+                html.A('AQUI', id='redirect', href='/quem_somos'),
+                ' e veja como você pode fazer parte disso.'
+            ]
         )
+
     ]
 )

@@ -8,44 +8,39 @@ from datetime import datetime as dt
 from datetime import date
 from app import app
 from dash.dependencies import Input, Output
+from components import utils, table
+import components.utils as utils
 
 with open('data/geojson_uf.json') as response:
     geojson_uf = json.load(response)
 
 colors = {
     'background': '#343a40',
-    'text': 'white'
+    'text': 'rgba(255,255,255,0.9)'
 }
 
-df = pd.read_csv('data/predictions.csv')
-df['data'] = pd.to_datetime(df['data'])
+df = utils.get_df()
 current_year = 2020
 
 map_df = pd.read_csv('data/predictions.csv')
 map_df = map_df[map_df['anomalo'] != 1]
 map_df = map_df[['estado', 'anomalo']].groupby('estado', as_index=False).mean()
-map_df = map_df.rename(columns={'anomalo': 'media de anomalia'})
+map_df = map_df.rename(columns={'anomalo': 'Suspeitômetro'})
 
 fig = px.choropleth(map_df,
-                    geojson=geojson_uf,
-                    locations='estado',
-                    color='media de anomalia',
-                    featureidkey='properties.UF_05',
-                    scope='south america',
-                    color_continuous_scale='ylorrd'
-                    )
+    geojson=geojson_uf,
+    locations='estado',
+    color='Suspeitômetro',
+    featureidkey='properties.UF_05',
+    scope='south america',
+    color_continuous_scale='ylorrd',
+)
 
-fig.update_layout(margin={"r": 0, "t": 0, "l": 0,
-                          "b": 0}, clickmode='event+select')
-
-anomaly_colors = []
-for color in px.colors.sequential.YlOrRd:
-    anomaly_colors += [
-        color.replace(')', ',{})'.format(0.25)),
-        color.replace(')', ',{})'.format(0.50)),
-        color.replace(')', ',{})'.format(0.75)),
-        color.replace(')', ',{})'.format(1))
-    ]
+fig.update_layout(
+    margin={"r": 0, "t": 0, "l": 0, "b": 0},
+    clickmode='event+select',
+    height=550
+)
 
 
 def update_dataframe(df, start_date, end_date, price_limit, amount_limit, states_clicked):
@@ -74,146 +69,20 @@ def update_dataframe(df, start_date, end_date, price_limit, amount_limit, states
         & (updated_df['quantidade'] <= amount_limit[1])
     ]
 
-    updated_df = updated_df.rename(columns={
-        'data': 'Data',
-        'estado': 'UF',
-        'nome': 'Compra',
-        'preco': 'Preço/Unidade',
-        'quantidade': 'Unidades',
-        'anomalo': 'Anomalia'
-    })
+    updated_df = utils.get_renamed_df(updated_df)
 
     updated_df = updated_df.assign(
         **updated_df.select_dtypes(['datetime']).astype(str).to_dict('list')
     )
     return updated_df
 
-
-def get_anomaly_color(value):
-    color_index = 0
-    anomaly = 0
-    while anomaly < value and color_index < 35:
-        anomaly += 0.277
-        color_index += 1
-
-    return anomaly_colors[color_index]
-
-
-def create_row(row):
-    tr_children = []
-    for index, value in row.iteritems():
-        if index not in ['Fonte', 'anomalo_label']:
-            if index == 'Compra':
-                tr_children.append(
-                    html.Td(
-                        style={
-                            'fontSize': 'small',
-                            'textAlign': 'center',
-                            'width': '70%'
-                        },
-                        children=[
-                            value, ' (', html.A('Fonte', href=row['Fonte']), ')']
-                    )
-                )
-            elif index == 'Anomalia':
-                tr_children.append(
-                    html.Td(
-                        title='Nível: {}\nStatus: {}'.format(
-                            value, row['anomalo_label']),
-                        children=html.Div(
-                            className='progress',
-                            style={
-                                'backgroundColor': '#cfcfcf'
-                            },
-                            children=html.Div(
-                                className='progress-bar',
-                                style={
-                                    'width': '{}%'.format(value*10),
-                                    'backgroundColor': get_anomaly_color(value)
-                                },
-                                role="progressbar",
-                                **{
-                                    'aria-valuenow': "{}".format(value*10),
-                                    'aria-valuemin': "0",
-                                    'aria-valuemax': "100"
-                                }
-                            )
-                        )
-                    )
-                )
-            elif index == 'Data':
-                if row['Data'] == 'NaT':
-                    unknown_date = 'Sem data definida'
-                    tr_children.append(
-                        html.Td(
-                            style={'fontSize': 'small', 'textAlign': 'center'},
-                            children=unknown_date
-                        )
-                    )
-                else:
-                    olddate = dt.strptime(row['Data'], '%Y-%m-%d')
-                    newdate = str(olddate.strftime('%d/%m/%Y'))
-                    tr_children.append(
-                        html.Td(
-                            style={'fontSize': 'small', 'textAlign': 'center'},
-                            children=newdate
-                        )
-                    )
-            elif index == 'Preço/Unidade':
-                value = '%.2f' % value
-                preco = list(str(value)[::-1])[3:]
-                decimal = list(str(value)[::-1])[:2]
-                decimal.reverse()
-                for i in range(len(preco) - 1):
-                    if i != 0 and i % 3 == 0:
-                        preco.insert(i, '.')
-                preco.reverse()
-                formated_value = 'R$ %s,%s ' % (
-                    ''.join(preco), ''.join(decimal))
-                tr_children.append(
-                    html.Td(
-                        style={'fontSize': 'small', 'textAlign': 'center'},
-                        children=formated_value
-                    )
-                )
-            else:
-                tr_children.append(
-                    html.Td(
-                        style={'fontSize': 'small', 'textAlign': 'center'},
-                        children=value
-                    )
-                )
-
-    return html.Tr(children=tr_children)
-
-
-def update_table(df):
-    return html.Table(
-        className='table table-sm table-hover',
-        style={'backgroundColor': 'white'},
-        children=[
-            html.Thead(
-                className='thead-light',
-                children=html.Tr(
-                    [
-                        html.Th(column, style={
-                                'fontSize': 'small', 'textAlign': 'center'})
-                        for column in df.columns if column not in ['Fonte', 'anomalo_label']
-                    ]
-                )
-            ),
-            html.Tbody(
-                [create_row(row) for index, row in df.iterrows()]
-            ),
-        ]
-    )
-
+do_not_create = ['Fonte', 'anomalo_label', 'nome_original']
 
 layout = html.Div(
     children=[
         html.H3(
             id='dados-estado',
-            children='Dados de Compras de Respiradores',
+            children='Compras de ventiladores',
             style={
                 'textAlign': 'center',
                 'color': colors['text'],
@@ -232,8 +101,7 @@ layout = html.Div(
                             display_format='D/M/Y',
                             min_date_allowed=df['data'].min(),
                             max_date_allowed=df['data'].max(),
-                            initial_visible_month=dt(
-                                current_year, df['data'].max().month, 1),
+                            initial_visible_month=dt(current_year, df['data'].max().month, 1),
                             start_date=df['data'].min(),
                             end_date=df['data'].max(),
                         ),
@@ -244,10 +112,7 @@ layout = html.Div(
                     children=[
                         html.Div(
                             html.Span(
-                                'Faixa de Preço: R$ %s - R$ %s' % (
-                                    df['preco'].min(), df['preco'].max()),
                                 id='display-price-slider',
-                                className="price-span",
                             ),
                             style={
                                 'color': colors['text'],
@@ -268,8 +133,6 @@ layout = html.Div(
                     children=[
                         html.Div(
                             html.Span(
-                                'Quantidade: %s - %s' % (df['quantidade'].min(),
-                                                         df['quantidade'].max()),
                                 id='display-amount-slider',
                             ),
                             style={
@@ -291,40 +154,28 @@ layout = html.Div(
         ),
 
         html.Div(
-            className='d-flex justify-content-center mt-3',
-            style={
-                'minHeight': '66vh'
-            },
+            className='row',
             children=[
                 html.Div(
-                    className='row',
+                    className='col p-0',
+                    children=dcc.Graph(
+                        id="choropleth",
+                        figure=fig,
+                    ),
+                    style={'maxWidth': '30%'}
+                ),
+                html.Div(
+                    className='col p-0',
+                    children=html.Div(
+                        id='data-table',
+                        style={'backgroundColor': '#f8f9fa'},
+                        className='table-responsive',
+                    ),
                     style={
-                        'width': '98%',
+                        'maxWidth': '70%',
+                        'maxHeight': '550px',
+                        'overflow': 'auto',
                     },
-                    children=[
-                        html.Div(
-                            className='col-12 p-0',
-                            children=dcc.Graph(
-                                id="choropleth",
-                                figure=fig,
-                            ),
-                            style={
-                                'maxWidth': '30%',
-                            }
-                        ),
-                        html.Div(
-                            className='col-12 p-0',
-                            children=html.Div(
-                                id='data-table',
-                                className='table-responsive table-striped',
-                            ),
-                            style={
-                                'maxWidth': '70%',
-                                'maxHeight': '66vh',
-                                'overflow': 'auto'
-                            },
-                        ),
-                    ]
                 ),
             ]
         ),
@@ -346,7 +197,7 @@ layout = html.Div(
 def update_data(start_date, end_date, price_limit, amount_limit, state_clicked):
     updated_df = update_dataframe(
         df, start_date[:10], end_date[:10], price_limit, amount_limit, state_clicked)
-    return update_table(updated_df)
+    return table.create_table(updated_df, do_not_create)
 
 
 @app.callback(
@@ -354,15 +205,10 @@ def update_data(start_date, end_date, price_limit, amount_limit, state_clicked):
     [Input('price-slider', 'value')]
 )
 def update_price_slider(limits):
-    formated_limits = []
-    for limit in limits:
-        preco = list(str(limit)[::-1])
-        for i in range(len(preco) - 1):
-            if i != 0 and i % 3 == 0:
-                preco.insert(i, '.')
-        preco.reverse()
-        formated_limits.append(''.join(preco))
-    return 'Faixa de Preço: R$ %s,00 - R$ %s,00' % (formated_limits[0], formated_limits[1])
+    return 'Faixa de Preço: %s - %s' % (
+        utils.get_formated_price(limits[0]),
+        utils.get_formated_price(limits[1])
+    )
 
 
 @app.callback(

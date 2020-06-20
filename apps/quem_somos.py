@@ -20,5 +20,13 @@ layout = html.Div([
                 'color' : 'rgba(255,255,255,0.9)'
             }
         ),
+        html.Ul(children=[html.Li(children=f'Líder: Asian Shay (https://github.com/aianshay)'),
+            html.Li(children='Web Dev: Alberto Sobrinho (https://github.com/a-skz)'),
+            html.Li(children='Web Dev: Pedro Arouck (https://github.com/Arouck)'),
+            html.Li(children='Data Analyst: Renan Cunha (https://github.com/renan-cunha)'),
+            html.Li(children='Data Analyst: Renato Mota (https://github.com/Rjlmota)')],
+                          style={'textAlign': 'center',
+                'color' : 'rgba(255,255,255,0.9)'
+            })
 ])
 
