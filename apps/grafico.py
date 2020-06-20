@@ -8,6 +8,7 @@ from datetime import datetime as dt
 from datetime import date
 from app import app
 from dash.dependencies import Input, Output
+from components import utils, table
 import components.utils as utils
 
 with open('data/geojson_uf.json') as response:
@@ -162,7 +163,6 @@ def update_table(df):
         ]
     )
 
-
 layout = html.Div(
     children=[
         html.H3(
@@ -253,6 +253,7 @@ layout = html.Div(
                     className='col p-0',
                     children=html.Div(
                         id='data-table',
+                        style={'backgroundColor': '#f8f9fa'},
                         className='table-responsive',
                     ),
                     style={
@@ -281,7 +282,7 @@ layout = html.Div(
 def update_data(start_date, end_date, price_limit, amount_limit, state_clicked):
     updated_df = update_dataframe(
         df, start_date[:10], end_date[:10], price_limit, amount_limit, state_clicked)
-    return update_table(updated_df)
+    return table.create_table(updated_df, do_not_create)
 
 
 @app.callback(
