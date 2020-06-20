@@ -29,7 +29,7 @@ app.layout = html.Div([
                                 href='/data'
                             ),
                             html.A(
-                                'Como Funciona',
+                                'Sobre',
                                 className='nav-item nav-link',
                                 href='/como_funciona',
                             ),
