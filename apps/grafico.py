@@ -24,19 +24,22 @@ current_year = 2020
 map_df = pd.read_csv('data/predictions.csv')
 map_df = map_df[map_df['anomalo'] != 1]
 map_df = map_df[['estado', 'anomalo']].groupby('estado', as_index=False).mean()
-map_df = map_df.rename(columns={'anomalo': 'media de anomalia'})
+map_df = map_df.rename(columns={'anomalo': 'Suspeitômetro'})
 
 fig = px.choropleth(map_df,
                     geojson=geojson_uf,
                     locations='estado',
-                    color='media de anomalia',
+                    color='Suspeitômetro',
                     featureidkey='properties.UF_05',
                     scope='south america',
-                    color_continuous_scale='ylorrd'
+                    color_continuous_scale='ylorrd',
                     )
 
-fig.update_layout(margin={"r": 0, "t": 0, "l": 0,
-                          "b": 0}, clickmode='event+select')
+fig.update_layout(
+    margin={"r": 0, "t": 0, "l": 0, "b": 0},
+    clickmode='event+select',
+    height=550
+)
 
 anomaly_colors = []
 for color in px.colors.sequential.YlOrRd:
@@ -47,6 +50,17 @@ for color in px.colors.sequential.YlOrRd:
         color.replace(')', ',{})'.format(1))
     ]
 
+
+def get_formated_price(value):
+    value = '%.2f' % value
+    preco = list(str(value)[::-1])[3:]
+    decimal = list(str(value)[::-1])[:2]
+    decimal.reverse()
+    for i in range(len(preco) - 1):
+        if i != 0 and i % 3 == 0:
+            preco.insert(i, '.')
+    preco.reverse()
+    return 'R$ %s,%s ' % (''.join(preco), ''.join(decimal))
 
 def update_dataframe(df, start_date, end_date, price_limit, amount_limit, states_clicked):
     if states_clicked is not None:
@@ -80,7 +94,7 @@ def update_dataframe(df, start_date, end_date, price_limit, amount_limit, states
         'nome': 'Compra',
         'preco': 'Preço/Unidade',
         'quantidade': 'Unidades',
-        'anomalo': 'Anomalia'
+        'anomalo': 'Suspeitômetro'
     })
 
     updated_df = updated_df.assign(
@@ -109,21 +123,18 @@ def create_row(row):
                         style={
                             'fontSize': 'small',
                             'textAlign': 'center',
-                            'width': '70%'
                         },
                         children=[
                             value, ' (', html.A('Fonte', href=row['Fonte']), ')']
                     )
                 )
-            elif index == 'Anomalia':
+            elif index == 'Suspeitômetro':
                 tr_children.append(
                     html.Td(
                         title='Nível: {}\nStatus: {}'.format(value, row['anomalo_label']),
                         children=html.Div(
                             className='progress',
-                            style={
-                                'backgroundColor': '#cfcfcf'
-                            },
+                            style={'backgroundColor': '#cfcfcf'},
                             children=html.Div(
                                 className='progress-bar',
                                 style={
@@ -159,20 +170,10 @@ def create_row(row):
                         )
                     )
             elif index == 'Preço/Unidade':
-                value = '%.2f' % value
-                preco = list(str(value)[::-1])[3:]
-                decimal = list(str(value)[::-1])[:2]
-                decimal.reverse()
-                for i in range(len(preco) - 1):
-                    if i != 0 and i % 3 == 0:
-                        preco.insert(i, '.')
-                preco.reverse()
-                formated_value = 'R$ %s,%s ' % (
-                    ''.join(preco), ''.join(decimal))
                 tr_children.append(
                     html.Td(
                         style={'fontSize': 'small', 'textAlign': 'center'},
-                        children=formated_value
+                        children=get_formated_price(value)
                     )
                 )
             else:
@@ -290,40 +291,27 @@ layout = html.Div(
         ),
 
         html.Div(
-            className='d-flex justify-content-center mt-3',
-            style={
-                'minHeight': '66vh'
-            },
+            className='row',
             children=[
                 html.Div(
-                    className='row',
+                    className='col p-0',
+                    children=dcc.Graph(
+                        id="choropleth",
+                        figure=fig,
+                    ),
+                    style={'maxWidth': '30%'}
+                ),
+                html.Div(
+                    className='col p-0',
+                    children=html.Div(
+                        id='data-table',
+                        className='table-responsive',
+                    ),
                     style={
-                        'width': '98%',
+                        'maxWidth': '70%',
+                        'maxHeight': '550px',
+                        'overflow': 'auto',
                     },
-                    children=[
-                        html.Div(
-                            className='col-12 p-0',
-                            children=dcc.Graph(
-                                id="choropleth",
-                                figure=fig,
-                            ),
-                            style={
-                                'maxWidth': '30%',
-                            }
-                        ),
-                        html.Div(
-                            className='col-12 p-0',
-                            children=html.Div(
-                                id='data-table',
-                                className='table-responsive table-striped',
-                            ),
-                            style={
-                                'maxWidth': '70%',
-                                'maxHeight': '66vh',
-                                'overflow': 'auto'
-                            },
-                        ),
-                    ]
                 ),
             ]
         ),
@@ -353,7 +341,9 @@ def update_data(start_date, end_date, price_limit, amount_limit, state_clicked):
     [Input('price-slider', 'value')]
 )
 def update_price_slider(limits):
-    return 'Faixa de Preço: R$%s - R$%s' % (limits[0], limits[1])
+    return 'Faixa de Preço: %s - %s' % (
+        get_formated_price(limits[0]), get_formated_price(limits[1])
+    )
 
 
 @app.callback(
@@ -362,6 +352,3 @@ def update_price_slider(limits):
 )
 def update_amount_slider(limits):
     return 'Quantidade: %s - %s' % (limits[0], limits[1])
-
-# for data in df['data']:
-#     print(pd.isnull(data))
