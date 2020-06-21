@@ -12,7 +12,6 @@ app.layout = html.Div([
         className='navbar navbar-expand-lg navbar-dark bg-dark',
         children=[
             html.Div(
-                className='collapse navbar-collapse',
                 id='navbarNav',
                 children=[
                     html.Div(
