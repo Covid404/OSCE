@@ -13,13 +13,6 @@ layout = html.Div([
                 'color' : 'rgba(255,255,255,0.9)'
             }
         ),
-        html.Div(
-            'Equipe 06: Covid404 - Hackaton Serpro 2020',
-            style={
-                'textAlign': 'center',
-                'color' : 'rgba(255,255,255,0.9)'
-            }
-        ),
         html.P(),
         html.Ul(children=[
             html.Li(children=[html.B('CEO: '),
@@ -32,17 +25,22 @@ layout = html.Div([
             html.A(href='https://github.com/renan-cunha',children="Renan Cunha")]),
             html.Li(children=[html.B('Data Analyst: '),
             html.A(href='https://github.com/Rjlmota',children="Renato Mota")])],
-                          style={'textAlign': 'center',
-                'color' : 'rgba(255,255,255,0.9)'
-            }),
+            style={
+                'textAlign': 'center',
+                'color' : 'rgba(255,255,255,0.9)',
+                'marginTop' : '2%'
+                }
+            ),
         html.P(),
-        html.Div(children=[
-            f'Esse website foi desenvolvido durante o ', 
+        html.Div(
+            children=[
+            f'Esse website foi desenvolvido pela equipe 06: Covid404, durante o ', 
             html.A(children='Hackaton Serpro 2020 ',
                    href='https://www.serpro.gov.br/menu/quem-somos/eventos/hackserpro/hackserpro-online')],
             style={
                 'textAlign': 'center',
-                'color' : 'rgba(255,255,255,0.9)'
+                'color' : 'rgba(255,255,255,0.9)',
+                'marginTop' : '2%'
             }
         ),
 ])
