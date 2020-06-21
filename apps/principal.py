@@ -146,30 +146,29 @@ layout = html.Div(
 
         html.Br(),
         html.Br(),
-
-        html.P(
-            style={'color': colors['text']},
-            children='''
-                    Somos uma equipe de estudantes da Universidade Federal do
-                    Pará sem quaisquer fins lucrativos.
-                '''
-        ),
-
-        html.P(
-            style={'color': colors['text']},
-            children='''
-                Por esse motivo, necessitamos do seu apoio!
-            '''
-        ),
-
-        html.P(
-            style={'color': colors['text']},
-            children=[
-                'Clique ',
-                html.A('AQUI', id='redirect', href='/quem_somos'),
-                ' e veja como você pode fazer parte disso.'
-            ]
-        )
+#        html.P( 
+#            style={'color': colors['text']},
+#            children='''
+#                    Somos uma equipe de estudantes da Universidade Federal do
+#                    Pará sem quaisquer fins lucrativos.
+#                '''
+#        ),
+#
+#        html.P(
+#            style={'color': colors['text']},
+#            children='''
+#                Por esse motivo, necessitamos do seu apoio!
+#            '''
+#        ),
+#
+#        html.P(
+#            style={'color': colors['text']},
+#            children=[
+#                'Clique ',
+#                html.A('AQUI', id='redirect', href='/quem_somos'),
+#                ' e veja como você pode fazer parte disso.'
+#            ]
+#        )
 
     ]
 )
