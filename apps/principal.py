@@ -139,7 +139,7 @@ layout = html.Div(
                             secretarias estaduais. Clique 
                         ''',
                         html.A('AQUI', id='redirect', href='/sobre'),
-                        ' para saber mais,'
+                        ' para saber mais.'
                     ]
                 ),
             ]
