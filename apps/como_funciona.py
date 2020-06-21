@@ -18,8 +18,8 @@ layout = [
         style={'textAlign': 'justify', 'color': 'rgba(255,255,255,0.9)'},
         children='''
             O Observatório usa diversas técnicas e tecnologias para monitorar 
-            as compras (apenas de ventiladores pulmonares por enquanto) e 
-            determinar o nível de anomalia de cada compra, o chamado 
+            as compras (apenas de ventiladores pulmonares por enquanto) enquanto 
+            a IARA determina o nível de anomalia de cada compra, o chamado 
             suspeitômetro. O sistema determina o quanto cada compra é 
             suspeita, e não se houve realmente fraude. A tarefa de verificação
             de fraude deve ser feita através de um trabalho investigativo, o 
@@ -165,7 +165,7 @@ layout = [
                                 style={'width': '60%', 'color': 'rgba(255, 255, 255, 0.9)'},
                                 children=[
                                     '''
-                                        Aqui é onde é feita a detecção de anomalias a partir dos dados obtidos.
+                                        Aqui é onde a IARA realiza a detecção de anomalias a partir dos dados obtidos.
                                         O algoritmo que utilizamos é o
                                     ''',
                                     html.Span(

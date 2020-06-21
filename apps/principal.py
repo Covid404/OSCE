@@ -120,7 +120,8 @@ layout = html.Div(
                 html.H5(
                     className='text-center',
                     children='''
-                        O Observatório é um sistema que utiliza inteligência artificial para
+                        O Observatório é um sistema que utiliza uma 
+                        Inteligência Artificial chamada IARA para
                         monitorar os gastos públicos no combate à
                         COVID-19. O Observatório preza pela
                         visualização simples e intuitiva dos gastos para os órgãos
@@ -132,7 +133,7 @@ layout = html.Div(
                     className='text-center',
                     children=[
                         '''
-                            Com a ciência de dados, o Observatório é capaz de alertar um gasto suspeito,
+                            A IARA é capaz de alertar um gasto suspeito,
                             destoante de todos os outros de mesmo tipo feitos pelo país.
                             Ele funciona consultando e analisando periodicamente os gastos das
                             secretarias estaduais. Clique 

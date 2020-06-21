@@ -23,7 +23,7 @@ layout = html.Div([
         html.P(),
         html.Ul(children=[
             html.Li(children=[html.B('CEO: '),
-            html.A(href='https://github.com/aianshay',children="Asian Shay")]),
+            html.A(href='https://github.com/aianshay',children="Aian Shay")]),
             html.Li(children=[html.B('Web Dev: '),
             html.A(href='https://github.com/a-skz',children="Alberto Sobrinho")]),
             html.Li(children=[html.B('Web Dev: '),
