@@ -1,4 +1,5 @@
 import json
+import urllib
 import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
@@ -154,6 +155,20 @@ layout = html.Div(
         ),
 
         html.Div(
+            style={'textAlign': 'right', 'fontSize': 'small', 'color': colors['text']},
+            children=[
+                'Baixe o arquivo ',
+                html.A(
+                    children='AQUI',
+                    id='download-csv',
+                    download='osce-dados.csv',
+                    href='',
+                    target='_blank'
+                )
+            ]
+        ),
+
+        html.Div(
             className='row',
             children=[
                 html.Div(
@@ -180,6 +195,34 @@ layout = html.Div(
             ]
         ),
 
+        # html.Div(
+        #     style={'textAlign': 'right'},
+        #     children=[
+        #         html.A(
+        #             className='btn btn-sm btn-success',
+        #             id='download-csv',
+        #             download='osce-dados.csv',
+        #             href='',
+        #             target='_blank',
+        #             children='Baixe o arquivo CSV',
+        #         ) 
+        #     ]
+        # )
+
+        # html.P(
+        #     style={'textAlign': 'right', 'color': colors['text']},
+        #     children=[
+        #         'Baixe o arquivo com informaçoes adicionais ',
+        #         html.A(
+        #             children='AQUI',
+        #             id='download-csv',
+        #             download='osce-dados.csv',
+        #             href='',
+        #             target='_blank'
+        #         )
+        #     ]
+        # )
+
     ]
 )
 
@@ -196,7 +239,13 @@ layout = html.Div(
 )
 def update_data(start_date, end_date, price_limit, amount_limit, state_clicked):
     updated_df = update_dataframe(
-        df, start_date[:10], end_date[:10], price_limit, amount_limit, state_clicked)
+        df,
+        start_date[:10],
+        end_date[:10],
+        price_limit,
+        amount_limit,
+        state_clicked
+    )
     return table.create_table(updated_df, do_not_create)
 
 
@@ -210,10 +259,32 @@ def update_price_slider(limits):
         utils.get_formated_price(limits[1])
     )
 
-
 @app.callback(
     Output('display-amount-slider', 'children'),
     [Input('amount-slider', 'value')]
 )
 def update_amount_slider(limits):
     return 'Quantidade: %s - %s' % (limits[0], limits[1])
+
+@app.callback(
+    Output('download-csv', 'href'),
+    [
+        Input('date-picker', 'start_date'),
+        Input('date-picker', 'end_date'),
+        Input('price-slider', 'value'),
+        Input('amount-slider', 'value'),
+        Input('choropleth', 'selectedData')
+    ]
+)
+def update_csv_download(start_date, end_date, price_limit, amount_limit, state_clicked):
+    updated_df = update_dataframe(
+        df,
+        start_date[:10],
+        end_date[:10],
+        price_limit,
+        amount_limit,
+        state_clicked
+    )
+    csv = updated_df.to_csv(index=False,encoding='utf-8')    
+    csv = "data:text/csv;charset=utf-8," + urllib.parse.quote(csv)
+    return csv
