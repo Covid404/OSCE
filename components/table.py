@@ -14,7 +14,7 @@ def create_row(row, do_not_create):
                             'textAlign': 'center',
                         },
                         title=row['nome_original'],
-                        children=value
+                        children='{} - {}'.format(row['id'], value)
                     )
                 )
             elif index == 'Suspeitômetro':
@@ -49,7 +49,7 @@ def create_row(row, do_not_create):
                         children=utils.get_formated_date(value)
                     )
                 )
-            elif index == 'Preço/Unidade':
+            elif index in ['Preço/Unidade', 'Preço Total']:
                 tr_children.append(
                     html.Td(
                         style={'fontSize': 'small', 'textAlign': 'center'},
