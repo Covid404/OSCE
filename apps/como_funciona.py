@@ -172,7 +172,7 @@ layout = [
                                         'Minimum Covariance Determinant Estimator,',
                                         className='font-italic'
                                     ),
-                                    'que detecta',
+                                    ' que detecta',
                                     html.Span(
                                         ' outliers',
                                         className='font-italic'
@@ -231,7 +231,7 @@ layout = [
                                             ),
                                     ' e a biblioteca ',
                                     html.Span(
-                                        'Plotly',
+                                        'Plotly ',
                                         className='font-italic'
                                     ),
                                     'para visualização de dados.'
