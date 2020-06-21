@@ -16,7 +16,7 @@ colors = {
     'text': 'rgba(255,255,255,0.9)'
 }
 
-do_not_create = ['Fonte', 'anomalo_label', 'nome_original']
+do_not_create = ['Fonte', 'anomalo_label', 'nome_original', 'id']
 def create_top_table(df):
     renamed_df = utils.get_renamed_df(df)
 
@@ -38,7 +38,7 @@ layout = html.Div(
             style={'marginBottom': '2%'},
             children=[
                 html.H2(
-                    'COVIS - Sistema de Monitoramento de Compras Públicas',
+                    'Observatório de Compras Emergenciais',
                     style={'color': colors['text']}
                 ),
             ],
