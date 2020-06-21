@@ -27,7 +27,7 @@ slides = [
                                   ),
                                   '''
                                     automaticamente.
-                                    No caso do COVIS, os dados são extraídos dos portais de transparência estaduais,
+                                    No caso do Observatório, os dados são extraídos dos portais de transparência estaduais,
                                     então foi necessário criar um programa específico para cada portal.
                                     Nessa etapa, utilizamos a ferramenta
                                 ''',
@@ -184,10 +184,15 @@ layout = [
     html.P(
         style={'textAlign': 'justify', 'color': 'white'},
         children='''
-            O COVIS usa diversas técnicas e tecnologias para monitorar as compras de
-            ventiladores e determinar o nível de anomalia de cada compra. O COVIS determina o quanto cada compra é suspeita, e não se houve realmente
-            fraude. A tarefa de verificação de fraude deve ser feita através de um trabalho
-            investigativo, o qual não é o papel do COVIS.
+            O Observatório usa diversas técnicas e tecnologias para monitorar 
+            as compras (apenas de ventiladores pulmonares por enquanto) e 
+            determinar o nível de anomalia de cada compra, o chamado 
+            suspeitômetro. O sistema determina o quanto cada compra é 
+            suspeita, e não se houve realmente fraude. A tarefa de verificação
+            de fraude deve ser feita através de um trabalho investigativo, o 
+            qual não é o papel do Observatório. O papel do sistema é agilizar 
+            o processo investigativo informando aos agentes fiscalizadores 
+            quais compras possuem uma maior probabilidade de serem irregulares.
         '''
     ),
 
@@ -223,7 +228,7 @@ layout = [
             '.',
             '''
             Essas técnicas foram transformadas em módulos, que são executados em sequência
-            de acordo com a figura abaixo. Toda a solução foi implementada na linguagem de programação
+            de acordo com o slide abaixo. Toda a solução foi implementada na linguagem de programação
             ''',
             html.Span(
                 'Python',
