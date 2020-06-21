@@ -174,7 +174,7 @@ layout = [
                                     ),
                                     'que detecta',
                                     html.Span(
-                                        'outliers',
+                                        ' outliers',
                                         className='font-italic'
                                     ),
                                     '''
