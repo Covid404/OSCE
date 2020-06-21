@@ -76,7 +76,7 @@ def update_dataframe(df, start_date, end_date, price_limit, amount_limit, states
     )
     return updated_df
 
-do_not_create = ['Fonte', 'anomalo_label', 'nome_original']
+do_not_create = ['Fonte', 'anomalo_label', 'nome_original', 'id']
 
 layout = html.Div(
     children=[

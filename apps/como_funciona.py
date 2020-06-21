@@ -177,12 +177,17 @@ slides = [
 
 layout = [
     html.H3(
-        style={'textAlign': 'center', 'color': 'white'},
-        children='Como Funciona?'
+        style={
+            'textAlign': 'center',
+            'color': 'rgba(255,255,255,0.9)',
+            'marginBottom': '2%'
+        },
+        children='Sobre'
     ),
 
+
     html.P(
-        style={'textAlign': 'justify', 'color': 'white'},
+        style={'textAlign': 'justify', 'color': 'rgba(255,255,255,0.9)'},
         children='''
             O Observatório usa diversas técnicas e tecnologias para monitorar 
             as compras (apenas de ventiladores pulmonares por enquanto) e 
@@ -256,7 +261,7 @@ layout = [
                         id='prev_slide',
                         className='button_slider',
                         style={
-                            'color': '#bababa',
+                            'color': '#25282b',
                             'marginRight': '2%'
                         }
                     ),
@@ -283,7 +288,7 @@ layout = [
                         id='prox_slide',
                         className='button_slider',
                         style={
-                            'color': '#bababa',
+                            'color': '#25282b',
                             'marginLeft': '2%'
                         }
                     ),
@@ -294,55 +299,60 @@ layout = [
     html.P(),
 
     html.H2(children="Fontes dos Dados",
-                          style={'textAlign': 'center',
-                'color' : 'rgba(255,255,255,0.9)'
-            }),
+            style={
+                    'textAlign': 'center',
+                    'color': 'rgba(255,255,255,0.9)',
+                    'marginBottom' : '2%',
+                    'marginTop' : '2%'
+                }
+            ),
 
     html.Ul(children=[
-            html.Li(children=[html.A(href='http://transparencia.al.gov.br/despesa/despesas-com-covid19/', 
+            html.Li(children=[html.A(href='http://transparencia.al.gov.br/despesa/despesas-com-covid19/',
                                      children="AL")]),
-            html.Li(children=[html.A(href='http://www.transparencia.ap.gov.br/consulta/2/496/despesas/', 
+            html.Li(children=[html.A(href='http://www.transparencia.ap.gov.br/consulta/2/496/despesas/',
                                      children="AP")]),
-            html.Li(children=[html.A(href='http://www.saude.ba.gov.br/temasdesaude/coronavirus/contratacoes-covid19/', 
+            html.Li(children=[html.A(href='http://www.saude.ba.gov.br/temasdesaude/coronavirus/contratacoes-covid19/',
                                      children="BA")]),
-            html.Li(children=[html.A(href='https://www.comprasgovernamentais.gov.br/index.php/transparencia/60-transparencia/1313-transparencia-dos-dados-de-compras-para-o-covid-19', 
+            html.Li(children=[html.A(href='https://www.comprasgovernamentais.gov.br/index.php/transparencia/60-transparencia/1313-transparencia-dos-dados-de-compras-para-o-covid-19',
                                      children="BR")]),
-            html.Li(children=[html.A(href='https://cearatransparente.ce.gov.br/portal-da-transparencia/paginas/coronavirus-despesas', 
+            html.Li(children=[html.A(href='https://cearatransparente.ce.gov.br/portal-da-transparencia/paginas/coronavirus-despesas',
                                      children="CE")]),
-            html.Li(children=[html.A(href='https://coronavirus.es.gov.br/contratos-emergenciais', 
+            html.Li(children=[html.A(href='https://coronavirus.es.gov.br/contratos-emergenciais',
                                      children="ES")]),
-            html.Li(children=[html.A(href='http://www.transparencia.dadosabertos.mg.gov.br/dataset/contratacoes-coronavirus', 
+            html.Li(children=[html.A(href='http://www.transparencia.dadosabertos.mg.gov.br/dataset/contratacoes-coronavirus',
                                      children="MG")]),
-            html.Li(children=[html.A(href='http://www.comprascoronavirus.ms.gov.br/', 
+            html.Li(children=[html.A(href='http://www.comprascoronavirus.ms.gov.br/',
                                      children="MS")]),
-            html.Li(children=[html.A(href='http://www.transparencia.mt.gov.br/-/contratos-covid-19', 
+            html.Li(children=[html.A(href='http://www.transparencia.mt.gov.br/-/contratos-covid-19',
                                      children="MT")]),
-            html.Li(children=[html.A(href='https://transparenciacovid19.pa.gov.br/covid.json', 
+            html.Li(children=[html.A(href='https://transparenciacovid19.pa.gov.br/covid.json',
                                      children="PA")]),
-            html.Li(children=[html.A(href='https://comprasemergenciaiscovid19.saude.pe.gov.br/', 
+            html.Li(children=[html.A(href='https://comprasemergenciaiscovid19.saude.pe.gov.br/',
                                      children="PE")]),
-            html.Li(children=[html.A(href='https://sistemas.tce.pi.gov.br/contratosweb/mural/?s=covid', 
+            html.Li(children=[html.A(href='https://sistemas.tce.pi.gov.br/contratosweb/mural/?s=covid',
                                      children="PI")]),
-            html.Li(children=[html.A(href='http://www.transparencia.pr.gov.br/pte/compras/dispensasInexigibilidade?windowId=adf', 
+            html.Li(children=[html.A(href='http://www.transparencia.pr.gov.br/pte/compras/dispensasInexigibilidade?windowId=adf',
                                      children="PR")]),
-            html.Li(children=[html.A(href='http://painel.saude.rj.gov.br/contratos/transparencia.html', 
+            html.Li(children=[html.A(href='http://painel.saude.rj.gov.br/contratos/transparencia.html',
                                      children="RJ")]),
-            html.Li(children=[html.A(href='http://transparencia.rn.gov.br/covid', 
+            html.Li(children=[html.A(href='http://transparencia.rn.gov.br/covid',
                                      children="RN")]),
-            html.Li(children=[html.A(href='http://www.transparencia.ro.gov.br/Grafico/DespesasCOVID19', 
+            html.Li(children=[html.A(href='http://www.transparencia.ro.gov.br/Grafico/DespesasCOVID19',
                                      children="RO")]),
-            html.Li(children=[html.A(href='http://www.transparencia.rr.gov.br/index.php/roraima-contra-o-coronavirus/consulta-despesas-covid19', 
+            html.Li(children=[html.A(href='http://www.transparencia.rr.gov.br/index.php/roraima-contra-o-coronavirus/consulta-despesas-covid19',
                                      children="RR")]),
-            html.Li(children=[html.A(href='https://www.saopaulo.sp.gov.br/coronavirus/transparencia/', 
+            html.Li(children=[html.A(href='https://www.saopaulo.sp.gov.br/coronavirus/transparencia/',
                                      children="SP")]),
-                          ], style={'textAlign': 'center',
-                'color' : 'rgba(255,255,255,0.9)'
-            }),
+            ], style={'textAlign': 'center',
+                      'color': 'rgba(255,255,255,0.9)'
+                      }),
 
 ]
 
+
 @app.callback(Output('slide', 'children'),
-            [
+              [
     Input('prev_slide', 'n_clicks'),
     Input('prox_slide', 'n_clicks')
 ])

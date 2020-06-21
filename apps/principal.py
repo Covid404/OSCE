@@ -16,7 +16,7 @@ colors = {
     'text': 'rgba(255,255,255,0.9)'
 }
 
-do_not_create = ['Fonte', 'anomalo_label', 'nome_original']
+do_not_create = ['Fonte', 'anomalo_label', 'nome_original', 'id']
 def create_top_table(df):
     renamed_df = utils.get_renamed_df(df)
 
@@ -38,7 +38,7 @@ layout = html.Div(
             style={'marginBottom': '2%'},
             children=[
                 html.H2(
-                    'COVIS - Sistema de Monitoramento de Compras Públicas',
+                    'Observatório de Compras Emergenciais',
                     style={'color': colors['text']}
                 ),
             ],
@@ -120,9 +120,9 @@ layout = html.Div(
                 html.H5(
                     className='text-center',
                     children='''
-                        O COVIS é um sistema que utiliza inteligência artificial para
+                        O Observatório é um sistema que utiliza inteligência artificial para
                         monitorar os gastos públicos no combate à
-                        COVID-19. O COVIS preza pela
+                        COVID-19. O Observatório preza pela
                         visualização simples e intuitiva dos gastos para os órgãos
                         fiscalizadores, ONGs, imprensa e sociedade civil.
                     '''
@@ -132,13 +132,13 @@ layout = html.Div(
                     className='text-center',
                     children=[
                         '''
-                            Com a ciência de dados, o COVIS é capaz de alertar um gasto suspeito,
+                            Com a ciência de dados, o Observatório é capaz de alertar um gasto suspeito,
                             destoante de todos os outros de mesmo tipo feitos pelo país.
                             Ele funciona consultando e analisando periodicamente os gastos das
                             secretarias estaduais. Clique 
                         ''',
-                        html.A('AQUI', id='redirect', href='/como_funciona'),
-                        ' para saber mais.'
+                        html.A('AQUI', id='redirect', href='/sobre'),
+                        ' para saber mais,'
                     ]
                 ),
             ]

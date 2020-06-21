@@ -19,9 +19,14 @@ app.layout = html.Div([
                         className='navbar-nav',
                         children=[
                             html.A(
-                                'Home',
                                 className='nav-item nav-link',
                                 href='/',
+                                children=html.Img(
+                                    className='d-inline-block align-top',
+                                    src='assets/logo.png',
+                                    width=30,
+                                    height=30
+                                )
                             ),
                             html.A(
                                 'Observatório',
@@ -31,7 +36,7 @@ app.layout = html.Div([
                             html.A(
                                 'Sobre',
                                 className='nav-item nav-link',
-                                href='/como_funciona',
+                                href='/sobre',
                             ),
                             html.A(
                                 'Quem somos',
@@ -58,7 +63,7 @@ def display_page(pathname):
         return quem_somos.layout
     elif pathname == '/data':
         return grafico.layout
-    elif pathname == '/como_funciona':
+    elif pathname == '/sobre':
         return como_funciona.layout
     else:
         return page_not_found.layout

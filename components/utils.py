@@ -5,27 +5,17 @@ from datetime import datetime as dt
 
 def get_df(path='data/predictions.csv'):
     df = pd.read_csv(path)
-    df['data'] = pd.to_datetime(df['data'])
+    df['data'] = pd.to_datetime(df['data'], format="%d/%m/%Y")
     return df
-
-anomaly_colors = []
-for color in px.colors.sequential.YlOrRd:
-    anomaly_colors += [
-        color.replace(')', ',{})'.format(0.25)),
-        color.replace(')', ',{})'.format(0.50)),
-        color.replace(')', ',{})'.format(0.75)),
-        color.replace(')', ',{})'.format(1))
-    ]
 
 def get_anomaly_color(value):
     color_index = 0
     anomaly = 0
-    while anomaly < value and color_index < 35:
-        anomaly += 0.277
+    while anomaly < value and color_index < 8:
+        anomaly += 1.11
         color_index += 1
 
-    return anomaly_colors[color_index]
-
+    return px.colors.sequential.YlOrRd[color_index]
 
 def get_formated_price(value):
     value = '%.2f' % value
@@ -36,7 +26,7 @@ def get_formated_price(value):
         if i != 0 and i % 3 == 0:
             preco.insert(i, '.')
     preco.reverse()
-    return 'R$ %s,%s ' % (''.join(preco), ''.join(decimal))
+    return 'R$%s,%s ' % (''.join(preco), ''.join(decimal))
 
 def get_formated_date(value):
     if value != 'NaT':
@@ -51,7 +41,9 @@ def get_renamed_df(df):
             'estado': 'UF',
             'nome': 'Compra',
             'preco': 'Preço/Unidade',
-            'quantidade': 'Unidades',
-            'anomalo': 'Suspeitômetro'
+            'valor_total': 'Valor Total',
+            'quantidade': 'Qtd.',
+            'anomalo': 'Suspeitômetro',
+            'valor_total': 'Preço Total'
         }
     )
