@@ -22,9 +22,11 @@ def get_formated_price(value):
     preco = list(str(value)[::-1])[3:]
     decimal = list(str(value)[::-1])[:2]
     decimal.reverse()
-    for i in range(len(preco) - 1):
-        if i != 0 and i % 3 == 0:
-            preco.insert(i, '.')
+    added = 0
+    for i in range(1, len(preco)):
+        if i % 3 == 0:
+            preco.insert(i+added, '.')
+            added += 1
     preco.reverse()
     return 'R$%s,%s ' % (''.join(preco), ''.join(decimal))
 
