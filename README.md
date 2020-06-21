@@ -22,7 +22,7 @@ ONGs, imprensa e sociedade civil.
 
 ## Como Executar?
 
-O sistema está em produção no link https://covis-dashboard.herokuapp.com/,
+O sistema está em produção no link https://osce-dashboard.herokuapp.com/,
 mas é possível executar de forma local seguindo os passos abaixo.
 
 1. Instalar o [Python 3.6.9 +](https://www.python.org/downloads/) 
