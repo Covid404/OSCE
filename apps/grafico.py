@@ -26,15 +26,16 @@ current_year = 2020
 map_df = pd.read_csv('data/predictions.csv')
 map_df = map_df[map_df['anomalo'] != 1]
 map_df = map_df[['estado', 'anomalo']].groupby('estado', as_index=False).mean()
-map_df = map_df.rename(columns={'anomalo': 'Suspeitômetro'})
+map_df = map_df.rename(columns={'anomalo': 'Suspeitômetro', 'estado': 'UF'})
 
 fig = px.choropleth(map_df,
     geojson=geojson_uf,
-    locations='estado',
+    locations='UF',
     color='Suspeitômetro',
     featureidkey='properties.UF_05',
     scope='south america',
     color_continuous_scale='ylorrd',
+    range_color=[0, 10],
 )
 
 fig.update_layout(
@@ -44,7 +45,7 @@ fig.update_layout(
 )
 
 
-def update_dataframe(df, start_date, end_date, price_limit, amount_limit, states_clicked):
+def update_dataframe(df, start_date, end_date, price_limit, amount_limit, states_clicked, alert):
     if states_clicked is not None:
         states = [point['location'] for point in states_clicked['points']]
         updated_df = df[df['estado'].isin(states)]
@@ -70,6 +71,9 @@ def update_dataframe(df, start_date, end_date, price_limit, amount_limit, states
         & (updated_df['quantidade'] <= amount_limit[1])
     ]
 
+    if alert != []:
+        updated_df = updated_df[updated_df['anomalo_label'].isin(alert)]
+
     updated_df = utils.get_renamed_df(updated_df)
 
     updated_df = updated_df.assign(
@@ -92,10 +96,11 @@ layout = html.Div(
         ),
 
         html.Div(
-            className='row row-cols-1 row-cols-md-3 mt-5',
+            className='row row-cols-1 row-cols-md-4 mt-5',
             children=[
                 html.Div(
-                    className='col text-center',
+                    className='col pr-0 pl-0 text-center',
+                    style={'fontSize': 'small'},
                     children=[
                         dcc.DatePickerRange(
                             id='date-picker',
@@ -109,12 +114,11 @@ layout = html.Div(
                     ],
                 ),
                 html.Div(
-                    className='col text-center',
+                    className='col pr-0 pl-0 text-center',
+                    style={'fontSize': 'small'},
                     children=[
                         html.Div(
-                            html.Span(
-                                id='display-price-slider',
-                            ),
+                            html.Span(id='display-price-slider'),
                             style={
                                 'color': colors['text'],
                                 'marginBottom': '1%',
@@ -130,7 +134,8 @@ layout = html.Div(
                     ]
                 ),
                 html.Div(
-                    className='col text-center',
+                    className='col pr-0 pl-0 text-center',
+                    style={'fontSize': 'small'},
                     children=[
                         html.Div(
                             html.Span(
@@ -151,13 +156,31 @@ layout = html.Div(
                         )
                     ]
                 ),
+                html.Div(
+                    className='col pr-0. pl-0 text-center',
+                    style={'fontSize': 'small'},
+                    children=[
+                        dcc.Dropdown(
+                            id='alert-picker',
+                            options=[
+                                {'label': 'Baixo', 'value': 'baixo'},
+                                {'label': 'Médio', 'value': 'medio'},
+                                {'label': 'Alto', 'value': 'alto'},
+                            ],
+                            placeholder='Nível de Alerta do Suspeitômetro',
+                            searchable=False,
+                            multi=True,
+                            value=[]
+                        )
+                    ]
+                )
             ]
         ),
 
         html.Div(
             style={'textAlign': 'right', 'fontSize': 'small', 'color': colors['text']},
             children=[
-                'Baixe o arquivo ',
+                'Baixe essa tabela ',
                 html.A(
                     children='AQUI',
                     id='download-csv',
@@ -195,34 +218,6 @@ layout = html.Div(
             ]
         ),
 
-        # html.Div(
-        #     style={'textAlign': 'right'},
-        #     children=[
-        #         html.A(
-        #             className='btn btn-sm btn-success',
-        #             id='download-csv',
-        #             download='osce-dados.csv',
-        #             href='',
-        #             target='_blank',
-        #             children='Baixe o arquivo CSV',
-        #         ) 
-        #     ]
-        # )
-
-        # html.P(
-        #     style={'textAlign': 'right', 'color': colors['text']},
-        #     children=[
-        #         'Baixe o arquivo com informaçoes adicionais ',
-        #         html.A(
-        #             children='AQUI',
-        #             id='download-csv',
-        #             download='osce-dados.csv',
-        #             href='',
-        #             target='_blank'
-        #         )
-        #     ]
-        # )
-
     ]
 )
 
@@ -234,17 +229,20 @@ layout = html.Div(
         Input('date-picker', 'end_date'),
         Input('price-slider', 'value'),
         Input('amount-slider', 'value'),
-        Input('choropleth', 'selectedData')
+        Input('choropleth', 'selectedData'),
+        Input('alert-picker', 'value')
     ],
 )
-def update_data(start_date, end_date, price_limit, amount_limit, state_clicked):
+def update_data(start_date, end_date, price_limit, amount_limit, state_clicked, alert):
+    print(alert)
     updated_df = update_dataframe(
         df,
         start_date[:10],
         end_date[:10],
         price_limit,
         amount_limit,
-        state_clicked
+        state_clicked,
+        alert
     )
     return table.create_table(updated_df, do_not_create)
 
@@ -254,7 +252,7 @@ def update_data(start_date, end_date, price_limit, amount_limit, state_clicked):
     [Input('price-slider', 'value')]
 )
 def update_price_slider(limits):
-    return 'Faixa de Preço: %s - %s' % (
+    return 'Preço/Unidade: %s - %s' % (
         utils.get_formated_price(limits[0]),
         utils.get_formated_price(limits[1])
     )
@@ -273,17 +271,19 @@ def update_amount_slider(limits):
         Input('date-picker', 'end_date'),
         Input('price-slider', 'value'),
         Input('amount-slider', 'value'),
-        Input('choropleth', 'selectedData')
+        Input('choropleth', 'selectedData'),
+        Input('alert-picker', 'value')
     ]
 )
-def update_csv_download(start_date, end_date, price_limit, amount_limit, state_clicked):
+def update_csv_download(start_date, end_date, price_limit, amount_limit, state_clicked, alert):
     updated_df = update_dataframe(
         df,
         start_date[:10],
         end_date[:10],
         price_limit,
         amount_limit,
-        state_clicked
+        state_clicked,
+        alert
     )
     csv = updated_df.to_csv(index=False,encoding='utf-8')    
     csv = "data:text/csv;charset=utf-8," + urllib.parse.quote(csv)

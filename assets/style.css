@@ -71,37 +71,18 @@ body {
     text-align: center;
 }
 
+.Select-control,
+.is-open {
+    background-color: #343a40;
+}
+
+.Select-placeholder {
+    color: rgba(255,255,255,0.9);
+}
+
 .table td{
     border-top: none;
 }
-
-/*.item-container { 
-    position: relative;
-    -webkit-animation: slide 0.5s forwards;
-    animation: slide 0.5s forwards;
-    overflow: hidden;
-}
-
-.item-container-2 { 
-    position: relative;
-    -webkit-animation: slide 0.5s forwards;
-    animation: slide 0.5s forwards;
-    overflow: hidden;
-}
-
-.item-container-3 { 
-    position: relative;
-    -webkit-animation: slide 0.5s forwards;
-    animation: slide 0.5s forwards;
-    overflow: hidden;
-}
-
-.item-container-4 { 
-    position: relative;
-    -webkit-animation: slide 0.5s forwards;
-    animation: slide 0.5s forwards;
-    overflow: hidden;
-} */
 
 @keyframes slide {
     from {
