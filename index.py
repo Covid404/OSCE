@@ -19,13 +19,13 @@ app.layout = html.Div([
                         className='navbar-nav',
                         children=[
                             html.A(
-                                className='nav-item nav-link',
+                                className='nav-brand',
                                 href='/',
                                 children=html.Img(
                                     className='d-inline-block align-top',
-                                    src='assets/logo.png',
-                                    width=30,
-                                    height=30
+                                    src='assets/logo.svg',
+                                    width=40,
+                                    height=35
                                 )
                             ),
                             html.A(
