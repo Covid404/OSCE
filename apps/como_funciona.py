@@ -179,7 +179,7 @@ layout = [
     html.H3(
         style={
             'textAlign': 'center',
-            'color': 'white',
+            'color': 'rgba(255,255,255,0.9)',
             'marginBottom': '2%'
         },
         children='Sobre'
@@ -187,7 +187,7 @@ layout = [
 
 
     html.P(
-        style={'textAlign': 'justify', 'color': 'white'},
+        style={'textAlign': 'justify', 'color': 'rgba(255,255,255,0.9)'},
         children='''
             O COVIS usa diversas técnicas e tecnologias para monitorar as compras de
             ventiladores e determinar o nível de anomalia de cada compra. O COVIS determina o quanto cada compra é suspeita, e não se houve realmente
