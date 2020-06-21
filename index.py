@@ -19,9 +19,14 @@ app.layout = html.Div([
                         className='navbar-nav',
                         children=[
                             html.A(
-                                'Home',
                                 className='nav-item nav-link',
                                 href='/',
+                                children=html.Img(
+                                    className='d-inline-block align-top',
+                                    src='assets/logo.png',
+                                    width=30,
+                                    height=30
+                                )
                             ),
                             html.A(
                                 'Observatório',
