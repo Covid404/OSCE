@@ -124,7 +124,8 @@ layout = html.Div(
                         Inteligência Artificial chamada IARA para
                         monitorar os gastos públicos no combate à
                         COVID-19. O Observatório preza pela
-                        visualização simples e intuitiva dos gastos para os órgãos
+                        visualização simples e intuitiva e tem como seu público
+                        alvo os órgãos
                         fiscalizadores, ONGs, imprensa e sociedade civil.
                     '''
                 ),
@@ -135,7 +136,7 @@ layout = html.Div(
                         '''
                             A IARA é capaz de alertar um gasto suspeito,
                             destoante de todos os outros de mesmo tipo feitos pelo país.
-                            Ele funciona consultando e analisando periodicamente os gastos das
+                            Ela funciona consultando e analisando periodicamente os gastos das
                             secretarias estaduais. Clique 
                         ''',
                         html.A('AQUI', id='redirect', href='/sobre'),
