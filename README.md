@@ -1,7 +1,9 @@
+Apresentação do Pitch Deck no [YouTube](https://www.youtube.com/watch?v=S5De7M2fcls&t=2s).
 
 <p align="center">
   <img = src="doc/logo_desc.png">
 </p>
+
 
 
 O Observatório de Compras Emergenciais é um sistema que utiliza uma inteligência 
